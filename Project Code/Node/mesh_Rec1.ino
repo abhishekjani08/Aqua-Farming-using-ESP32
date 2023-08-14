@@ -1,3 +1,4 @@
+
 // Necessary Libraries
 #include "painlessMesh.h"
 #include <ArduinoJson.h>
@@ -5,15 +6,25 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <EEPROM.h>
+#include "GravityTDS.h"
 
  
 // WiFi Credentials
-#define   MESH_PREFIX     "gatewayNode"
+#define   MESH_PREFIX     "whateverYouLike"
 #define   MESH_PASSWORD   "somethingSneaky"
 #define   MESH_PORT       5555
 
+// Tds Sensor
+#define TdsSensorPin A2
+GravityTDS gravityTds;
+float temperature = 25,tdsValue = 0;
+
+
+// pH sensor pin
+#define SensorPin 0
+
 // Data wire is plugged into port 4
-#define ONE_WIRE_BUS 5
+#define ONE_WIRE_BUS 4
 
 // Setup a oneWire instance to communicate with any OneWire devices 
 OneWire oneWire(ONE_WIRE_BUS);
@@ -24,6 +35,11 @@ DallasTemperature sensors(&oneWire);
 int led;
 int led_status = 0;
 int board_status = 0;
+
+uint32_t raw; // Do sensor
+int buf[10]; // pH 
+
+
 
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
@@ -56,22 +72,49 @@ void receivedCallback( uint32_t from, String &msg )
       } 
   }
 }
-Task taskSendMessage( TASK_SECOND * 1, TASK_FOREVER, &sendMessage );
+Task taskSendMessage( TASK_SECOND * 600 , TASK_FOREVER, &sendMessage );
+
 
 void sendMessage()
 {
+
   DynamicJsonDocument doc(1024);
+
+  // Do
+  raw=analogRead(A1);
+
+
+  // pH  
+  for(int i=0;i<10;i++)       //Get 10 sample value from the sensor for smooth the value
+  { 
+    buf[i]=analogRead(SensorPin);
+    delay(10);
+  }
+  unsigned long int avgValue=0;
+  for(int i=2;i<8;i++)                      //take the average value of 6 center sample
+    avgValue+=buf[i];
+  float phValue=(float)avgValue*5.0/1024/6; //convert the analog into millivolt
+  phValue=3.5*phValue;                      //convert the millivolt into pH value 
+
+
   // Tempature 
   sensors.requestTemperatures(); 
   
   Serial.print("Celsius temperature: ");
   Serial.print(sensors.getTempCByIndex(0)); 
- 
+
+  // Tds Sensor 
+  temperature = sensors.getTempCByIndex(0);  //add your temperature sensor and read it
+  gravityTds.setTemperature(temperature);  // set the temperature and execute temperature compensation
+  gravityTds.update();  //sample and calculate
+  tdsValue = gravityTds.getTdsValue()
+
   //json doc
-  doc["type"] = "Data";
- 
-  int temp = sensors.getTempCByIndex(0);
-  doc["Temp"] = temp;
+  doc["DO"] = String(raw);
+  doc["pH"] = String(phValue);
+  doc["Temp"] =  String(sensors.getTempCByIndex(0));
+  doc["Tds"] = String(tdsValue);
+  
   String msg ;
   serializeJson(doc, msg);
   mesh.sendBroadcast( msg );
@@ -98,6 +141,10 @@ void setup() {
   pinMode(22, OUTPUT);
 
   sensors.begin();
+  gravityTds.setPin(TdsSensorPin);
+  gravityTds.setAref(5.0);  //reference voltage on ADC, default 5.0V on Arduino UNO
+  gravityTds.setAdcRange(1024);  //1024 for 10bit ADC;4096 for 12bit ADC
+  gravityTds.begin();  //initialization
   
   digitalWrite(21,LOW);
   digitalWrite(22,HIGH);
@@ -111,6 +158,7 @@ void setup() {
   mesh.onChangedConnections(&changedConnectionCallback);
   mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
   userScheduler.addTask( taskSendMessage );
+ 
   taskSendMessage.enable();
  
 }
@@ -119,5 +167,4 @@ void loop() {
   // it will run the user scheduler as well
   
   mesh.update();
-  Serial.print("I am in Child Node");
 }

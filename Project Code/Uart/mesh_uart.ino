@@ -12,7 +12,7 @@
 #define TXD2 17
 
 // WiFi Credentials for Mesh Networking
-#define   MESH_PREFIX     "gatewayNode"
+#define   MESH_PREFIX     "whateverYouLike"
 #define   MESH_PASSWORD   "somethingSneaky"
 #define   MESH_PORT       5555
 
@@ -115,7 +115,6 @@ void loop()
     message_ready = true;
   }
   Serial.print("Received Message - "); Serial.println(message);
-  delay(5000);
   DynamicJsonDocument doc(1024);
   DeserializationError error = deserializeJson(doc, message);
   board_status = doc["board_status"];

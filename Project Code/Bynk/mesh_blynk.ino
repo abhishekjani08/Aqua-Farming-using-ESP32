@@ -1,12 +1,8 @@
 
 #define BLYNK_PRINT Serial
-// #define BLYNK_TEMPLATE_ID "TMPLI35ikowW"
-// #define BLYNK_DEVICE_NAME "Espmesh"
-// #define BLYNK_AUTH_TOKEN "dkv2bkLAqd6-euOs-cUqYCpzcuj8KjQY"
-
-#define BLYNK_TEMPLATE_ID "TMPL3RH7UWPt0"
-#define BLYNK_TEMPLATE_NAME "Temperature Sensor"
-#define BLYNK_AUTH_TOKEN "cRDzju7JmD3E6Cu_lF8puumCSzTixBug"
+#define BLYNK_TEMPLATE_ID "TMPLI35ikowW"
+#define BLYNK_DEVICE_NAME "Espmesh"
+#define BLYNK_AUTH_TOKEN "dkv2bkLAqd6-euOs-cUqYCpzcuj8KjQY"
 
 // Necesaary Libraries
 #include <WiFi.h>
@@ -22,8 +18,8 @@ char auth[] = BLYNK_AUTH_TOKEN;
 
 // Your WiFi credentials.
 // Set password to "" for open networks.
-char ssid[] = "iot";
-char pass[] = "123456789";
+char ssid[] = "Redmi Note 9 Pro Max";
+char pass[] = "meandmine";
 
 // Variables
 int board;
