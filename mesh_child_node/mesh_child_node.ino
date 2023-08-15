@@ -8,8 +8,8 @@
 
  
 // WiFi Credentials
-#define   MESH_PREFIX     "gatewayNode"
-#define   MESH_PASSWORD   "somethingSneaky"
+#define   MESH_PREFIX     "meshnetwork"
+#define   MESH_PASSWORD   "123456789"
 #define   MESH_PORT       5555
 
 // Data wire is plugged into port 4
@@ -24,16 +24,20 @@ DallasTemperature sensors(&oneWire);
 int led;
 int led_status = 0;
 int board_status = 0;
-
+String msg1 = "";
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
 
 
 // Needed for painless library
-void receivedCallback( uint32_t from, String &msg )
+void receivedCallback( uint32_t from, String &msg)
 {
+  Serial.println("receivedCallback of Child Node");
+
+  //Serial.printf("Received from Gatewau msg=%s \n", from, msg.c_str());
   //Deserializing
   String json;
+  //String msg1 = "";
   DynamicJsonDocument doc(1024);
   json = msg.c_str();
   DeserializationError error = deserializeJson(doc, json);
@@ -45,7 +49,12 @@ void receivedCallback( uint32_t from, String &msg )
   board_status = doc["board"];
   led = doc["pin"];
   led_status = doc["status"];
-  Serial.print("Data "); Serial.println(led_status);
+  msg1 = doc["msg1"].as<String>();
+
+  ///Serial.print("Data "); 
+
+  Serial.println("Received in Child Node: " + msg1);
+  //Serial.println(msg1);
   if (board_status == 1){
      digitalWrite(21, !led_status);
     if(led_status == 1){
@@ -60,22 +69,26 @@ Task taskSendMessage( TASK_SECOND * 1, TASK_FOREVER, &sendMessage );
 
 void sendMessage()
 {
+  msg1 = "Hello from Child Node";
+  //mesh.sendBroadcast(msg1);
   DynamicJsonDocument doc(1024);
   // Tempature 
-  sensors.requestTemperatures(); 
-  
-  Serial.print("Celsius temperature: ");
-  Serial.print(sensors.getTempCByIndex(0)); 
- 
   //json doc
   doc["type"] = "Data";
+  sensors.requestTemperatures(); 
+  
+  //Serial.print("Celsius temperature: ");
+  //Serial.print(sensors.getTempCByIndex(0)); 
+ 
  
   int temp = sensors.getTempCByIndex(0);
   doc["Temp"] = temp;
+  doc["msg1"] = msg1;
   String msg ;
   serializeJson(doc, msg);
   mesh.sendBroadcast( msg );
-  Serial.print("Mesh Broadcast Sensor Data - "); Serial.println(msg);
+  //Serial.println("");
+  //Serial.println("Mesh Broadcast Sensor Data from Child Node - " + msg);
 }
 
 
@@ -104,7 +117,7 @@ void setup() {
 
 
   //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
-  mesh.setDebugMsgTypes( ERROR | STARTUP );  // set before init() so that you can see startup messages
+  mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  // set before init() so that you can see startup messages
   mesh.init( MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT );
   mesh.onReceive(&receivedCallback);
   mesh.onNewConnection(&newConnectionCallback);
@@ -119,5 +132,4 @@ void loop() {
   // it will run the user scheduler as well
   
   mesh.update();
-  Serial.print("I am in Child Node");
 }
