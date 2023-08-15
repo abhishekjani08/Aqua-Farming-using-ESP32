@@ -32,7 +32,7 @@ painlessMesh  mesh;
 // Needed for painless library
 void receivedCallback( uint32_t from, String &msg)
 {
-  Serial.println("receivedCallback of Child Node");
+  //Serial.println("receivedCallback of Child Node");
 
   //Serial.printf("Received from Gatewau msg=%s \n", from, msg.c_str());
   //Deserializing

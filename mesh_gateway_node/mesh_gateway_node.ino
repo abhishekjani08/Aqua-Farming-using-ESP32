@@ -29,6 +29,8 @@ bool message_received = false;
 String message = "";
 String msg1 = "";
 int temp;
+bool messageReady = true;
+
 
 String DO,pH,Temp,Tds;
 
@@ -131,7 +133,8 @@ void setup() {
   Serial.begin(115200);  // For Debugging purpose
   Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2); // For sending data to another ESP32
   
-  mesh.setDebugMsgTypes(ERROR | STARTUP | CONNECTION );
+  //mesh.setDebugMsgTypes(ERROR | STARTUP | CONNECTION );
+  mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  
   mesh.init( MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT );
   mesh.onReceive(&receivedCallback);
   mesh.onNewConnection(&newConnectionCallback);
@@ -154,9 +157,10 @@ void loop()
     message_ready = true;
   }
   //Serial.println("");
-  //Serial.println("Received from Serial2 - " + message); 
+  if(message_ready){
+    Serial.println("Received from Serial2 - " + message); 
 
-  //delay(5000); // delay here
+  //delay(3000); // delay here
 
   DynamicJsonDocument doc(1024);
   DeserializationError error = deserializeJson(doc, message);
@@ -171,15 +175,17 @@ void loop()
 
 
   // it will run the user scheduler as well
-  mesh.update();
   //timer.run();
+  message_ready  = false;
+  }
+  mesh.update();
 }
 
 void send_request()
 {
   DynamicJsonDocument doc_request(1024);
-  doc_request["type"] = "request";  
-  Serial.print("Sending Request - ");
+  doc_request["type"] = "Data";  
+  Serial.println("Sending Request - ");
   serializeJson(doc_request, Serial); //{"type":"request"}
   serializeJson(doc_request, Serial2);
   //taskSendMessage.setInterval((TASK_SECOND * 1));

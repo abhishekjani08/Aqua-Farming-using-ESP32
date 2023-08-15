@@ -111,11 +111,27 @@ void loop()
     }
     if (doc["type"] == "Data")
     {
-      Serial.println("Received Data in Blynk Node");
-      // Get data from virtual pin
+        Serial.println("Received Data in Blynk Node");
+        // JsonObject jsonObject = doc.as<JsonObject>();
+        // for (JsonPair pair : jsonObject) {
+        // Serial.print(pair.key().c_str());
+        // Serial.print(": ");
+        // Serial.println(pair.value().as<String>());
+        //}
+        // Extract temperature data
+        //String tempStr = doc["Temp"].as<String>();
+        //int temperature = tempStr.toFloat(); // Convert temperature to float
+        //Serial.println("Temperature: " + String(temperature, 2)); // Print temperature with 2 decimal places
+
+        int temperature = doc["Temp"].as<int>();
+        Serial.println("Temperature: " + String(temperature));
+
+        // Update Blynk virtual pin
+        Blynk.virtualWrite(V5, temperature);
+        // Get data from virtual pin
         Blynk.virtualWrite(V3,doc["DO"].as<String>());
         Blynk.virtualWrite(V4,doc["pH"].as<String>());
-        Blynk.virtualWrite(V5,doc["Temp"].as<String>());
+        //Blynk.virtualWrite(V5,doc["Temp"].as<String>());
         Blynk.virtualWrite(V6,doc["Tds"].as<String>());
     }
     messageReady = false;
