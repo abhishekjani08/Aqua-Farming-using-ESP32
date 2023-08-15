@@ -76,7 +76,7 @@ void loop()
     message = Serial2.readString();
 //    Serial.println(message);
     messageReady = true;
-    Serial.println("Serial2 available in blynk node - "); 
+    Serial.println("Serial2 available in blynk node"); 
 //    Serial.println(message);
   }
 

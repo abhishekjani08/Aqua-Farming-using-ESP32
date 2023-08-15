@@ -29,7 +29,6 @@ bool message_received = false;
 String message = "";
 String msg1 = "";
 int temp;
-bool messageReady = true;
 
 
 String DO,pH,Temp,Tds;
@@ -153,6 +152,7 @@ void loop()
 
   if (Serial2.available())
   {
+    Serial.println("Serial 2 available in Gateway Node");
     message = Serial2.readString();
     message_ready = true;
   }
@@ -160,23 +160,23 @@ void loop()
   if(message_ready){
     Serial.println("Received from Serial2 - " + message); 
 
-  //delay(3000); // delay here
+    //delay(2000); // delay here
 
-  DynamicJsonDocument doc(1024);
-  DeserializationError error = deserializeJson(doc, message);
-  board_status = doc["board_status"];
-  led = doc["led"];
-  led_status = doc["status"];
-  //temp = doc["Temp"]; 
-  //msg1 = doc["msg1"];
-  int temp = doc["Temp"].as<int>(); // Assuming Temp is of type int
-  String msg1 = doc["msg1"].as<String>();
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, message);
+    board_status = doc["board_status"];
+    led = doc["led"];
+    led_status = doc["status"];
+    //temp = doc["Temp"]; 
+    //msg1 = doc["msg1"];
+    int temp = doc["Temp"].as<int>(); // Assuming Temp is of type int
+    String msg1 = doc["msg1"].as<String>();
 
 
 
-  // it will run the user scheduler as well
-  //timer.run();
-  message_ready  = false;
+    // it will run the user scheduler as well
+    //timer.run();
+    message_ready  = false;
   }
   mesh.update();
 }
@@ -185,8 +185,10 @@ void send_request()
 {
   DynamicJsonDocument doc_request(1024);
   doc_request["type"] = "Data";  
-  Serial.println("Sending Request - ");
+  //Serial.println("Sending Request - ");
+  Serial.println("IS Serial 2 available: " + Serial2.available());
   serializeJson(doc_request, Serial); //{"type":"request"}
   serializeJson(doc_request, Serial2);
+  //Serial.println("");
   //taskSendMessage.setInterval((TASK_SECOND * 1));
 }
