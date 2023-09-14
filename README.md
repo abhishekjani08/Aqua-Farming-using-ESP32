@@ -14,6 +14,7 @@ _Download Arduino IDE from the official website_
 - `AsyncTCP`
 - `OneWire`
 - `DallasTemperature`
+- `ESPAsyncTCP` [URL](https://randomnerdtutorials.com/esp-mesh-esp32-esp8266-painlessmesh)
 
 *If you are not able to see the COM Port in device manager after connecting your ESP32*
 
