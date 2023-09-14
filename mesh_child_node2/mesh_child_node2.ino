@@ -53,7 +53,7 @@ void receivedCallback( uint32_t from, String &msg)
 
   ///Serial.print("Data "); 
 
-  Serial.println("Received in Child Node 1: " + msg1);
+  Serial.println("Received in Child Node 2: " + msg1);
   //Serial.println(msg1);
   if (board_status == 1){
      digitalWrite(21, !led_status);
@@ -69,7 +69,7 @@ Task taskSendMessage( TASK_SECOND * 1, TASK_FOREVER, &sendMessage );
 
 void sendMessage()
 {
-  msg1 = "Hello from Child Node 1";
+  msg1 = "Hello from Child Node 2";
   //mesh.sendBroadcast(msg1);
   DynamicJsonDocument doc(1024);
   // Tempature 
@@ -93,7 +93,7 @@ void sendMessage()
 
 
 void newConnectionCallback(uint32_t nodeId) {
-  Serial.printf("--> startHere: New Connection, nodeId = %u\n", nodeId);
+  Serial.printf("--> startHere: New Connection 2, nodeId = %u\n", nodeId);
 }
 
 void changedConnectionCallback() {
@@ -119,17 +119,11 @@ void setup() {
   //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
   mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  // set before init() so that you can see startup messages
   mesh.init( MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT );
-  Serial.println("\n");
   mesh.onReceive(&receivedCallback);
-  Serial.println("\n");
   mesh.onNewConnection(&newConnectionCallback);
-  Serial.println("\n");
   mesh.onChangedConnections(&changedConnectionCallback);
-  Serial.println("\n");
   mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
-  Serial.println("\n");
   userScheduler.addTask( taskSendMessage );
-  Serial.println("\n");
   taskSendMessage.enable();
  
 }

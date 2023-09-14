@@ -67,7 +67,7 @@ void sendMessage()
 // Needed for painless library
 void receivedCallback( uint32_t from, String &msg ) {
   Serial.println("Received Callback of Gateway");
-
+  // delay(2000);
   //Deserializing
   String json;
   DynamicJsonDocument doc(1024);
@@ -136,6 +136,7 @@ void setup() {
   mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  
   mesh.init( MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT );
   mesh.onReceive(&receivedCallback);
+  Serial.println("\n");
   mesh.onNewConnection(&newConnectionCallback);
   mesh.onChangedConnections(&changedConnectionCallback);
   mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
@@ -188,6 +189,7 @@ void send_request()
   //Serial.println("Sending Request - ");
   Serial.println("IS Serial 2 available: " + Serial2.available());
   serializeJson(doc_request, Serial); //{"type":"request"}
+  Serial.println("");
   serializeJson(doc_request, Serial2);
   //Serial.println("");
   //taskSendMessage.setInterval((TASK_SECOND * 1));
