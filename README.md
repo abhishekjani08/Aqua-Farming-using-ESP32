@@ -8,6 +8,7 @@ _Download Arduino IDE from the official website_
 
 **Install Board in Board Manager:**
 - `esp32` by Espressif systems 
+- `esp8266` by ESP8266 Community [Board URL](http://arduino.esp8266.com/stable/package_esp8266com_index.json) [Reference Website](https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide)
 
 **Install in Library Manager:**
 - `Blynk` for BlynkSimpleEsp32
@@ -16,7 +17,7 @@ _Download Arduino IDE from the official website_
 - `AsyncTCP`
 - `OneWire`
 - `DallasTemperature`
-- `ESPAsyncTCP` [URL](https://randomnerdtutorials.com/esp-mesh-esp32-esp8266-painlessmesh)
+- `ESPAsyncTCP` for ESP8266
 
 *If you are not able to see the COM Port in device manager after connecting your ESP32*
 
