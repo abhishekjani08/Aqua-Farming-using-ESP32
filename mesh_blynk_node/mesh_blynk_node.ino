@@ -42,7 +42,7 @@ bool messageReady = false;
 
 
 
-// Data Coming fro Blynk App
+// Data Coming from Blynk App
 BLYNK_WRITE(V1)
 {
   board = 1;
@@ -74,10 +74,10 @@ void loop()
   while (Serial2.available()) //
   {
     message = Serial2.readString();
-//    Serial.println(message);
+    //Serial.println(message);
     messageReady = true;
-    Serial.println("Serial2 available in blynk node"); 
-//    Serial.println(message);
+    Serial.println("Serial2 available in blynk node:" + message); 
+    //Serial.println(message);
   }
 
   // Only process message if there's one
@@ -111,7 +111,7 @@ void loop()
     }
     if (doc["type"] == "Data")
     {
-        Serial.println("Received Data in Blynk Node");
+        Serial.println("Received Type = Data in Blynk Node");
         // JsonObject jsonObject = doc.as<JsonObject>();
         // for (JsonPair pair : jsonObject) {
         // Serial.print(pair.key().c_str());
@@ -125,6 +125,16 @@ void loop()
 
         int temperature = doc["Temp"].as<int>();
         Serial.println("Temperature: " + String(temperature));
+
+        doc["type"] = "response";
+        // Get data from virtual pin
+        doc["board_status"] = board;
+        doc["led"] = pin;
+        doc["status"] = pin_status;
+        serializeJson(doc, Serial2); // Sending data to another ESP32
+        Serial.println("");
+        Serial.println("Sending Data - "); 
+        serializeJson(doc, Serial); //{"type":"response","board_status":1/2,"led": pin_number, "status": 1/0}
 
         // Update Blynk virtual pin
         Blynk.virtualWrite(V5, temperature);

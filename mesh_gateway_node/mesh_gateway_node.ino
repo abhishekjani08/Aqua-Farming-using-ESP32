@@ -16,6 +16,7 @@
 #define   MESH_PASSWORD   "123456789"
 #define   MESH_PORT       5555
 
+// Gateway Node ID: 
 
 // Variables
 int led;
@@ -24,8 +25,7 @@ int board_status;
 int board;
 int pin;
 int pin_status;
-bool message_ready = true;
-bool message_received = false;
+bool message_ready = false;
 String message = "";
 String msg1 = "";
 int temp;
@@ -40,14 +40,15 @@ painlessMesh  mesh;
 
 // User stub
 void sendMessage() ; // Prototype so PlatformIO doesn't complain
-void send_request() ;
+void send_request() ; // Sends data serially to Blynk Node
 
 Task taskSendMessage( TASK_SECOND * 1 , TASK_FOREVER, &sendMessage );
 Task taskSendRequest( TASK_SECOND * 1 , TASK_FOREVER, &send_request );
 
 void sendMessage()
 {
-  msg1 = "Hello from Gateway Node";
+  uint32_t nodeId = mesh.getNodeId();
+  msg1 = "Hello from Gateway Node with Node ID: " + String(nodeId);
   DynamicJsonDocument doc(1024);
   doc["board"] = board_status;
   doc["pin"] = led;
@@ -62,12 +63,26 @@ void sendMessage()
 
  // taskSendMessage.setInterval((TASK_SECOND * 1));
 }
+ 
+void send_request()
+{
+  DynamicJsonDocument doc_request(1024);
+  doc_request["type"] = "Data";  
+  doc_request["Temp"] = temp;
+  //Serial.println("Sending Request - ");
+  //Serial.println("IS Serial 2 available: " + Serial2.available());
+  serializeJson(doc_request, Serial); //{"type":"request"}
+  Serial.println("");
+  serializeJson(doc_request, Serial2);
+  //Serial.println("");
+  //taskSendMessage.setInterval((TASK_SECOND * 1));
+}
 
 
 // Needed for painless library
 void receivedCallback( uint32_t from, String &msg ) {
   Serial.println("Received Callback of Gateway");
-  // delay(2000);
+
   //Deserializing
   String json;
   DynamicJsonDocument doc(1024);
@@ -112,6 +127,7 @@ void receivedCallback( uint32_t from, String &msg ) {
   temp = doc["Temp"];
   Serial.println("Received in Gateway: " + msg1);
   serializeJson(doc, Serial); //{"type":"Data"}
+  Serial.println("");
   serializeJson(doc, Serial2);
 
   }
@@ -133,10 +149,17 @@ void setup() {
   Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2); // For sending data to another ESP32
   
   //mesh.setDebugMsgTypes(ERROR | STARTUP | CONNECTION );
-  mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  
+  //mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  
+  mesh.setDebugMsgTypes(ERROR | STARTUP );
+  
+  // Initialize the mesh network
   mesh.init( MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT );
+
+  // Get and print the Node ID
+  uint32_t nodeId = mesh.getNodeId();
+  Serial.printf("Node ID: %u\n", nodeId);
+
   mesh.onReceive(&receivedCallback);
-  Serial.println("\n");
   mesh.onNewConnection(&newConnectionCallback);
   mesh.onChangedConnections(&changedConnectionCallback);
   mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
@@ -151,7 +174,7 @@ void setup() {
 void loop()
 {
 
-  if (Serial2.available())
+  if(Serial2.available())
   {
     Serial.println("Serial 2 available in Gateway Node");
     message = Serial2.readString();
@@ -159,7 +182,7 @@ void loop()
   }
   //Serial.println("");
   if(message_ready){
-    Serial.println("Received from Serial2 - " + message); 
+    Serial.println("Received from Serial2: " + message); 
 
     //delay(2000); // delay here
 
@@ -174,23 +197,16 @@ void loop()
     String msg1 = doc["msg1"].as<String>();
 
 
-
+    
+  
     // it will run the user scheduler as well
     //timer.run();
     message_ready  = false;
   }
+  //Serial.printf("Node ID in loop: %u\n", mesh.getNodeId());
+  //delay(2000);
   mesh.update();
+  //delay(1000);
+  //Serial.println( "Blynk is " + Serial2.available());
 }
 
-void send_request()
-{
-  DynamicJsonDocument doc_request(1024);
-  doc_request["type"] = "Data";  
-  //Serial.println("Sending Request - ");
-  Serial.println("IS Serial 2 available: " + Serial2.available());
-  serializeJson(doc_request, Serial); //{"type":"request"}
-  Serial.println("");
-  serializeJson(doc_request, Serial2);
-  //Serial.println("");
-  //taskSendMessage.setInterval((TASK_SECOND * 1));
-}
