@@ -1,15 +1,4 @@
-
 #define BLYNK_PRINT Serial
-
-// Tushar's Credentials
-// #define BLYNK_TEMPLATE_ID "TMPLI35ikowW"
-// #define BLYNK_TEMPLATE_NAME "Espmesh"
-// #define BLYNK_AUTH_TOKEN "dkv2bkLAqd6-euOs-cUqYCpzcuj8KjQY"
-
-// Jani's Credentials
-// #define BLYNK_TEMPLATE_ID "TMPL3RH7UWPt0"
-// #define BLYNK_TEMPLATE_NAME "Temperature Sensor"
-// #define BLYNK_AUTH_TOKEN "cRDzju7JmD3E6Cu_lF8puumCSzTixBug"
 
 // Anish's Credentials
 #define BLYNK_TEMPLATE_ID "TMPL3y-A5yv23"
@@ -40,22 +29,51 @@ bool pin_status;
 String message = "";
 bool messageReady = false;
 
+#define LED_PIN 2           // LED is usually connected to D2 pin. Change if needed.
+
+BLYNK_WRITE(V0)
+{
+  //int value = param.asInt();
+  
+  //Serial.print("Value is ");
+  //Serial.println(value);
+  // Local variable `value` stores the incoming LED switch state (1 or 0)
+  // Based on this value, the physical LED on the board will be on or off:
+
+  // if (value == 1)
+  // {
+  //   digitalWrite(LED_PIN, HIGH);
+  //   Serial.println("LED High");
+  // }
+  // else
+  // {
+  //   digitalWrite(LED_PIN, LOW);
+  //   Serial.println("LED Low");
+  // }
+
+  board = 0;
+  pin = LED_PIN;
+  pin_status = param.asInt();   // Pin Status 1/0
+  Serial.println("V0 On");
+}
 
 
 // Data Coming from Blynk App
 BLYNK_WRITE(V1)
 {
   board = 1;
-  pin = 22;
-  pin_status = param.asInt();
-  Serial.println(pin_status);
+  pin = LED_PIN;
+  pin_status = param.asInt();   // Pin Status 1/0
+  //Serial.println(pin_status);
+  Serial.println("V1 On");
 }
 
 BLYNK_WRITE(V2)
 {
-  board = 1;
-  pin = 21;
+  board = 2;
+  pin = LED_PIN;
   pin_status = param.asInt();
+  Serial.println("V2 On");
 }
 
 
@@ -76,6 +94,7 @@ void loop()
     message = Serial2.readString();
     //Serial.println(message);
     messageReady = true;
+    //Serial.println("");
     Serial.println("Serial2 available in blynk node:" + message); 
     //Serial.println(message);
   }
@@ -87,6 +106,7 @@ void loop()
     DynamicJsonDocument doc(1024); // ArduinoJson version 6+
     // Attempt to deserialize the message
     DeserializationError error = deserializeJson(doc, message);
+
     if (error)
     {
       Serial.print(F("deserializeJson() failed: "));
@@ -101,48 +121,41 @@ void loop()
       Serial.println("Received Request from other ESP board");
       doc["type"] = "response";
       // Get data from virtual pin
-      doc["board_status"] = board;
+      doc["board_number"] = board;
       doc["led"] = pin;
       doc["status"] = pin_status;
+      
       serializeJson(doc, Serial2); // Sending data to another ESP32
       Serial.println("Sending Data - "); 
       serializeJson(doc, Serial); //{"type":"response","board_status":1/2,"led": pin_number, "status": 1/0}
-      Serial.println();
+      //Serial.println();
     }
+    
     if (doc["type"] == "Data")
     {
         Serial.println("Received Type = Data in Blynk Node");
-        // JsonObject jsonObject = doc.as<JsonObject>();
-        // for (JsonPair pair : jsonObject) {
-        // Serial.print(pair.key().c_str());
-        // Serial.print(": ");
-        // Serial.println(pair.value().as<String>());
-        //}
-        // Extract temperature data
-        //String tempStr = doc["Temp"].as<String>();
-        //int temperature = tempStr.toFloat(); // Convert temperature to float
-        //Serial.println("Temperature: " + String(temperature, 2)); // Print temperature with 2 decimal places
-
+      
         int temperature = doc["Temp"].as<int>();
         Serial.println("Temperature: " + String(temperature));
 
         doc["type"] = "response";
         // Get data from virtual pin
-        doc["board_status"] = board;
+        doc["board_number"] = board;
         doc["led"] = pin;
         doc["status"] = pin_status;
+
         serializeJson(doc, Serial2); // Sending data to another ESP32
-        Serial.println("");
+        //Serial.println("");
         Serial.println("Sending Data - "); 
         serializeJson(doc, Serial); //{"type":"response","board_status":1/2,"led": pin_number, "status": 1/0}
 
         // Update Blynk virtual pin
-        Blynk.virtualWrite(V5, temperature);
+        //Blynk.virtualWrite(V5, temperature);
         // Get data from virtual pin
-        Blynk.virtualWrite(V3,doc["DO"].as<String>());
-        Blynk.virtualWrite(V4,doc["pH"].as<String>());
-        //Blynk.virtualWrite(V5,doc["Temp"].as<String>());
-        Blynk.virtualWrite(V6,doc["Tds"].as<String>());
+        // Blynk.virtualWrite(V3,doc["DO"].as<String>());
+        // Blynk.virtualWrite(V4,doc["pH"].as<String>());
+        // //Blynk.virtualWrite(V5,doc["Temp"].as<String>());
+        // Blynk.virtualWrite(V6,doc["Tds"].as<String>());
     }
     messageReady = false;
   }

@@ -11,6 +11,7 @@
 #define   MESH_PREFIX     "meshnetwork"
 #define   MESH_PASSWORD   "123456789"
 #define   MESH_PORT       5555
+#define LED_PIN 2 
 
 // Data wire is plugged into port 4
 #define ONE_WIRE_BUS 5
@@ -23,8 +24,9 @@ DallasTemperature sensors(&oneWire);
 
 int led;
 int led_status = 0;
-int board_status = 0;
+int board_number = 0;
 String msg1 = "";
+String nodeName = "child1";
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
 
@@ -46,23 +48,22 @@ void receivedCallback( uint32_t from, String &msg)
     Serial.print("deserializeJson() failed: ");
     Serial.println(error.c_str());
   }
-  board_status = doc["board"];
+  board_number = doc["board"];
   led = doc["pin"];
   led_status = doc["status"];
   msg1 = doc["msg1"].as<String>();
 
-  ///Serial.print("Data "); 
 
-  Serial.println("Received in Child Node 1: " + msg1);
-  //Serial.println(msg1);
-  if (board_status == 1){
-     digitalWrite(21, !led_status);
-    if(led_status == 1){
-      digitalWrite(22, HIGH);
-      }
-    else{
-      digitalWrite(22, LOW);
-      } 
+  Serial.println("Received in Child Node 2: " + json);
+  
+  if (board_number == 1 && led_status == 1){
+    digitalWrite(led, led_status);
+    Serial.println("Child Node 1 ON");
+
+  }
+  else{
+    digitalWrite(led, !led_status);
+    Serial.println("Child Node 1 OFF");
   }
 }
 Task taskSendMessage( TASK_SECOND * 1, TASK_FOREVER, &sendMessage );
@@ -83,7 +84,9 @@ void sendMessage()
  
   int temp = sensors.getTempCByIndex(0);
   doc["Temp"] = temp;
+  doc["Node Name"] = nodeName;
   doc["msg1"] = msg1;
+  doc["led statues"] = led_status;
   String msg ;
   serializeJson(doc, msg);
   mesh.sendBroadcast( msg );
@@ -106,14 +109,11 @@ void nodeTimeAdjustedCallback(int32_t offset) {
 
 void setup() {
   Serial.begin(115200);
-
-  pinMode(21, OUTPUT);
-  pinMode(22, OUTPUT);
-
+  pinMode(LED_PIN, OUTPUT); 
+  digitalWrite(LED_PIN,LOW);
   sensors.begin();
   
-  digitalWrite(21,LOW);
-  digitalWrite(22,HIGH);
+  //digitalWrite(22,HIGH);
 
 
   //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
