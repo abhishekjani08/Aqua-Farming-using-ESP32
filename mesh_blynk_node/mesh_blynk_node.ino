@@ -33,24 +33,6 @@ bool messageReady = false;
 
 BLYNK_WRITE(V0)
 {
-  //int value = param.asInt();
-  
-  //Serial.print("Value is ");
-  //Serial.println(value);
-  // Local variable `value` stores the incoming LED switch state (1 or 0)
-  // Based on this value, the physical LED on the board will be on or off:
-
-  // if (value == 1)
-  // {
-  //   digitalWrite(LED_PIN, HIGH);
-  //   Serial.println("LED High");
-  // }
-  // else
-  // {
-  //   digitalWrite(LED_PIN, LOW);
-  //   Serial.println("LED Low");
-  // }
-
   board = 0;
   pin = LED_PIN;
   pin_status = param.asInt();   // Pin Status 1/0
@@ -95,8 +77,8 @@ void loop()
     //Serial.println(message);
     messageReady = true;
     //Serial.println("");
-    Serial.println("Serial2 available in blynk node:" + message); 
-    //Serial.println(message);
+    Serial.println("Serial2 available in blynk node:"); 
+    Serial.println(message);
   }
 
   // Only process message if there's one
@@ -114,43 +96,33 @@ void loop()
       messageReady = false;
       return;
     }
-
-    // If request is received from another ESP32 board
-    if (doc["type"] == "request")
-    {
-      Serial.println("Received Request from other ESP board");
-      doc["type"] = "response";
-      // Get data from virtual pin
-      doc["board_number"] = board;
-      doc["led"] = pin;
-      doc["status"] = pin_status;
-      
-      serializeJson(doc, Serial2); // Sending data to another ESP32
-      Serial.println("Sending Data - "); 
-      serializeJson(doc, Serial); //{"type":"response","board_status":1/2,"led": pin_number, "status": 1/0}
-      //Serial.println();
-    }
     
     if (doc["type"] == "Data")
     {
         Serial.println("Received Type = Data in Blynk Node");
       
-        int temperature = doc["Temp"].as<int>();
-        Serial.println("Temperature: " + String(temperature));
+        double child1_temperature = doc["child1_temperature"].as<double>();
+        double child2_temperature = doc["child2_temperature"].as<double>();
+        Serial.println("Temperature Child 1: " + String(child1_temperature));
+        Serial.println("Temperature Child 2: " + String(child2_temperature));
 
         doc["type"] = "response";
         // Get data from virtual pin
         doc["board_number"] = board;
         doc["led"] = pin;
         doc["status"] = pin_status;
+        doc["child1_temperature"] = child1_temperature;
+        doc["child2_temperature"] = child2_temperature;
+
 
         serializeJson(doc, Serial2); // Sending data to another ESP32
         //Serial.println("");
         Serial.println("Sending Data - "); 
-        serializeJson(doc, Serial); //{"type":"response","board_status":1/2,"led": pin_number, "status": 1/0}
+        serializeJson(doc, Serial); //{"type":"response","board_number":1/2,"led": pin_number, "status": 1/0}
 
         // Update Blynk virtual pin
-        //Blynk.virtualWrite(V5, temperature);
+        Blynk.virtualWrite(V5, child1_temperature);
+        Blynk.virtualWrite(V6, child2_temperature);
         // Get data from virtual pin
         // Blynk.virtualWrite(V3,doc["DO"].as<String>());
         // Blynk.virtualWrite(V4,doc["pH"].as<String>());

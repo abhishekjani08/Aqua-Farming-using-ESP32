@@ -29,6 +29,8 @@ String msg1 = "";
 String nodeName = "child1";
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
+double child1_temperature;
+double child2_temperature;
 
 
 // Needed for painless library
@@ -52,8 +54,11 @@ void receivedCallback( uint32_t from, String &msg)
   led = doc["pin"];
   led_status = doc["status"];
   msg1 = doc["msg1"].as<String>();
+  child1_temperature = doc["child1_temperature"].as<double>();
+  child2_temperature = doc["child2_temperature"].as<double>();
 
 
+  Serial.println("");
   Serial.println("Received in Child Node 2: " + json);
   
   if (board_number == 1 && led_status == 1){
@@ -63,7 +68,7 @@ void receivedCallback( uint32_t from, String &msg)
   }
   else{
     digitalWrite(led, !led_status);
-    Serial.println("Child Node 1 OFF");
+    //Serial.println("Child Node 1 OFF");
   }
 }
 Task taskSendMessage( TASK_SECOND * 1, TASK_FOREVER, &sendMessage );
@@ -82,11 +87,11 @@ void sendMessage()
   //Serial.print(sensors.getTempCByIndex(0)); 
  
  
-  int temp = sensors.getTempCByIndex(0);
-  doc["Temp"] = temp;
+  double temp = sensors.getTempCByIndex(0);
+  doc["child1_temperature"] = temp;
   doc["Node Name"] = nodeName;
   doc["msg1"] = msg1;
-  doc["led statues"] = led_status;
+  doc["led_status"] = led_status;
   String msg ;
   serializeJson(doc, msg);
   mesh.sendBroadcast( msg );
@@ -104,7 +109,7 @@ void changedConnectionCallback() {
 }
 
 void nodeTimeAdjustedCallback(int32_t offset) {
-  Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(), offset);
+  //Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(), offset);
 }
 
 void setup() {
@@ -112,12 +117,10 @@ void setup() {
   pinMode(LED_PIN, OUTPUT); 
   digitalWrite(LED_PIN,LOW);
   sensors.begin();
-  
-  //digitalWrite(22,HIGH);
-
 
   //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
-  mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  // set before init() so that you can see startup messages
+  mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );  // set before init() so that you can see startup messages
+  //mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  // set before init() so that you can see startup messages
   mesh.init( MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT );
   Serial.println("\n");
   mesh.onReceive(&receivedCallback);
