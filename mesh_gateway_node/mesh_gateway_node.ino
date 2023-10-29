@@ -21,14 +21,16 @@
 // Variables
 int led;
 int led_status;
-int board_status;
+int board_number;
 int board;
 int pin;
 int pin_status;
-bool message_ready = false;
+bool message_ready = true;
 String message = "";
 String msg1 = "";
 int temp;
+double child1_temperature;
+double child2_temperature;
 
 
 String DO,pH,Temp,Tds;
@@ -39,7 +41,7 @@ painlessMesh  mesh;
 
 
 // User stub
-void sendMessage() ; // Prototype so PlatformIO doesn't complain
+void sendMessage() ; // Prototype so PlatformIO doesn't complain/ Used to Broadcast Message to all Child Nodes
 void send_request() ; // Sends data serially to Blynk Node
 
 Task taskSendMessage( TASK_SECOND * 1 , TASK_FOREVER, &sendMessage );
@@ -50,10 +52,11 @@ void sendMessage()
   uint32_t nodeId = mesh.getNodeId();
   msg1 = "Hello from Gateway Node with Node ID: " + String(nodeId);
   DynamicJsonDocument doc(1024);
-  doc["board"] = board_status;
+  doc["board"] = board_number;
   doc["pin"] = led;
   doc["status"] =  led_status;
-  doc["Temp"] = temp;
+  doc["child1_temperature"] = child1_temperature;
+  doc["child2_temperature"] = child2_temperature;
   doc["msg1"] = msg1;
   //doc["status_1"] = led_status_1;
   String msg ;
@@ -68,8 +71,10 @@ void send_request()
 {
   DynamicJsonDocument doc_request(1024);
   doc_request["type"] = "Data";  
-  doc_request["Temp"] = temp;
-  //Serial.println("Sending Request - ");
+  doc_request["child1_temperature"] = child1_temperature; 
+  doc_request["child2_temperature"] = child2_temperature; 
+  //doc_request["Temp"] = temp;
+  Serial.print("Sending Request - ");
   //Serial.println("IS Serial 2 available: " + Serial2.available());
   serializeJson(doc_request, Serial); //{"type":"request"}
   Serial.println("");
@@ -81,7 +86,7 @@ void send_request()
 
 // Needed for painless library
 void receivedCallback( uint32_t from, String &msg ) {
-  Serial.println("Received Callback of Gateway");
+  //Serial.println("Received Callback of Gateway");
 
   //Deserializing
   String json;
@@ -94,41 +99,17 @@ void receivedCallback( uint32_t from, String &msg ) {
     Serial.println(error.c_str());
   }
 
-  // Serial.println("Before Printing JSON");
-  // Serial.println(json);
-
-  // // Print the JSON data to Serial
-  // Serial.println("Received JSON:");
-  // serializeJson(doc, Serial);
-  // Serial.println();
-
-  // // Clear the contents of Serial2 and print the JSON data
-  // Serial2.print("Received JSON: ");
-  // serializeJson(doc, Serial2);
-  // Serial2.println();
-  
-  // Serial.println("Before Printing JSON");
-  // Serial.println(json);
-  
-  // if (doc["type"] == "Data")
-  // //if (doc["type"].as<String>().equalsIgnoreCase("Data"))
-  // {
-  //   int temp = doc["Temp"];
-  //   // Forward temperature data to Blynk node
-  //   //Blynk.virtualWrite(V5, temp);  // Assuming V5 is your Blynk virtual pin for temperature
-  //   Serial.println("Got Temperature as " + temp);
-  // }
-  //int temp;
-  //String msg1 = "";
-  // doc["type"] = "Data"; 
-  // doc["Temp"] = temp;
-  // doc["msg1"] = msg1;
   msg1 = doc["msg1"].as<String>();
-  temp = doc["Temp"];
+  child1_temperature = doc["child1_temperature"];
+  child2_temperature = doc["child2_temperature"];
+  Serial.print("Child 1 Temp: ");
+  Serial.println(child1_temperature);
+  Serial.print("Child 2 Temp: ");
+  Serial.println(child2_temperature);
   Serial.println("Received in Gateway: " + msg1);
   serializeJson(doc, Serial); //{"type":"Data"}
-  Serial.println("");
   serializeJson(doc, Serial2);
+ 
 
   }
 
@@ -141,7 +122,7 @@ void changedConnectionCallback() {
 }
 
 void nodeTimeAdjustedCallback(int32_t offset) {
-  Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(), offset);
+  //Serial.printf("Adjusted time %u. Offset = %d\n", mesh.getNodeTime(), offset);
 }
 
 void setup() {
@@ -188,12 +169,16 @@ void loop()
 
     DynamicJsonDocument doc(1024);
     DeserializationError error = deserializeJson(doc, message);
-    board_status = doc["board_status"];
+    board_number = doc["board_number"];
     led = doc["led"];
     led_status = doc["status"];
     //temp = doc["Temp"]; 
     //msg1 = doc["msg1"];
-    int temp = doc["Temp"].as<int>(); // Assuming Temp is of type int
+    //int temp = doc["Temp"].as<int>(); // Assuming Temp is of type int
+
+    // reason behind getting last temperature even when child node 1 is down
+    double child1_temperature = doc["child1_temperature"].as<double>();
+    double child2_temperature = doc["child2_temperature"].as<double>();
     String msg1 = doc["msg1"].as<String>();
 
 
@@ -204,9 +189,9 @@ void loop()
     message_ready  = false;
   }
   //Serial.printf("Node ID in loop: %u\n", mesh.getNodeId());
-  //delay(2000);
+  //delay(100);
   mesh.update();
-  //delay(1000);
+  delay(1000);
   //Serial.println( "Blynk is " + Serial2.available());
 }
 
