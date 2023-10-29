@@ -59,7 +59,7 @@ void receivedCallback( uint32_t from, String &msg)
 
 
   Serial.println("");
-  Serial.println("Received in Child Node 2: " + json);
+  Serial.println("Received in Child Node 1: " + json);
   
   if (board_number == 1 && led_status == 1){
     digitalWrite(led, led_status);

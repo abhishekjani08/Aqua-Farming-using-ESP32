@@ -189,9 +189,9 @@ void loop()
     message_ready  = false;
   }
   //Serial.printf("Node ID in loop: %u\n", mesh.getNodeId());
-  delay(2000);
+  //delay(100);
   mesh.update();
-  //delay(1000);
+  delay(1000);
   //Serial.println( "Blynk is " + Serial2.available());
 }
 

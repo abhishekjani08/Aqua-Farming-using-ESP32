@@ -73,7 +73,7 @@ void setup()
 void loop()
 {
 
-  while(Serial2.available()) //
+  if(Serial2.available()) //
   {
     message = Serial2.readString();
     //Serial.println(message);
