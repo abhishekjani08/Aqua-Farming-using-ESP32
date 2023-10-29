@@ -28,6 +28,8 @@ int pin;
 bool pin_status;
 String message = "";
 bool messageReady = false;
+//double child1_temperature;
+//double child2_temperature;
 
 #define LED_PIN 2           // LED is usually connected to D2 pin. Change if needed.
 
@@ -71,19 +73,21 @@ void setup()
 void loop()
 {
 
-  while (Serial2.available()) //
+  while(Serial2.available()) //
   {
     message = Serial2.readString();
     //Serial.println(message);
-    messageReady = true;
     //Serial.println("");
     Serial.println("Serial2 available in blynk node:"); 
     Serial.println(message);
+    messageReady = true;
+    //break;
   }
 
   // Only process message if there's one
   if (messageReady)
   {
+    Serial.println("Received from Serial2: " + message); 
     // The only messages we'll parse will be formatted in JSON
     DynamicJsonDocument doc(1024); // ArduinoJson version 6+
     // Attempt to deserialize the message
@@ -100,19 +104,21 @@ void loop()
     if (doc["type"] == "Data")
     {
         Serial.println("Received Type = Data in Blynk Node");
-      
+
         double child1_temperature = doc["child1_temperature"].as<double>();
         double child2_temperature = doc["child2_temperature"].as<double>();
-        Serial.println("Temperature Child 1: " + String(child1_temperature));
-        Serial.println("Temperature Child 2: " + String(child2_temperature));
 
         doc["type"] = "response";
         // Get data from virtual pin
         doc["board_number"] = board;
         doc["led"] = pin;
         doc["status"] = pin_status;
-        doc["child1_temperature"] = child1_temperature;
-        doc["child2_temperature"] = child2_temperature;
+        //doc["child1_temperature"] = child1_temperature;
+        //doc["child2_temperature"] = child2_temperature;
+
+        
+        Serial.println("Temperature Child 1: " + String(child1_temperature));
+        Serial.println("Temperature Child 2: " + String(child2_temperature));
 
 
         serializeJson(doc, Serial2); // Sending data to another ESP32
