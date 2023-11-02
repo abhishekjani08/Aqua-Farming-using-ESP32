@@ -13,7 +13,7 @@
 #define   MESH_PORT       5555
 #define LED_PIN 2 
 
-// Data wire is plugged into port 4
+// Data wire is plugged into port 5
 #define ONE_WIRE_BUS 5
 
 // Setup a oneWire instance to communicate with any OneWire devices 
@@ -24,7 +24,7 @@ DallasTemperature sensors(&oneWire);
 
 int led;
 int led_status = 0;
-int board_number = 0;
+int board_number = 1;
 String msg1 = "";
 String nodeName = "child1";
 Scheduler userScheduler; // to control your personal task
@@ -71,7 +71,7 @@ void receivedCallback( uint32_t from, String &msg)
     //Serial.println("Child Node 1 OFF");
   }
 }
-Task taskSendMessage( TASK_SECOND * 1, TASK_FOREVER, &sendMessage );
+Task taskSendMessage( TASK_SECOND * 5, TASK_FOREVER, &sendMessage );
 
 void sendMessage()
 {
@@ -120,7 +120,7 @@ void setup() {
 
   //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
   mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );  // set before init() so that you can see startup messages
-  //mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  // set before init() so that you can see startup messages
+  // mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  // set before init() so that you can see startup messages
   mesh.init( MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT );
   Serial.println("\n");
   mesh.onReceive(&receivedCallback);

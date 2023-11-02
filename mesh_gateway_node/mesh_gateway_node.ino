@@ -31,6 +31,7 @@ String msg1 = "";
 int temp;
 double child1_temperature;
 double child2_temperature;
+String nodeName = "";
 
 
 String DO,pH,Temp,Tds;
@@ -71,14 +72,23 @@ void send_request()
 {
   DynamicJsonDocument doc_request(1024);
   doc_request["type"] = "Data";  
-  doc_request["child1_temperature"] = child1_temperature; 
-  doc_request["child2_temperature"] = child2_temperature; 
+  String tempChild1 = String(child1_temperature);
+  String tempChild2 = String(child2_temperature);
+  doc_request["child1_temperature"] = tempChild1; 
+  doc_request["child2_temperature"] = tempChild2; 
   //doc_request["Temp"] = temp;
   Serial.print("Sending Request - ");
   //Serial.println("IS Serial 2 available: " + Serial2.available());
-  serializeJson(doc_request, Serial); //{"type":"request"}
+  serializeJson(doc_request, Serial); //{"type":"Data","child1_temperature":0,"child2_temperature":0}
   Serial.println("");
   serializeJson(doc_request, Serial2);
+
+  // Serialize the JSON document to a String
+  //String jsonMessage;
+  //serializeJson(doc_request, jsonMessage);
+
+  // Send the JSON message via Serial2
+  //Serial2.println(jsonMessage);
   //Serial.println("");
   //taskSendMessage.setInterval((TASK_SECOND * 1));
 }
@@ -100,9 +110,23 @@ void receivedCallback( uint32_t from, String &msg ) {
   }
 
   msg1 = doc["msg1"].as<String>();
-  child1_temperature = doc["child1_temperature"];
-  child2_temperature = doc["child2_temperature"];
-  Serial.print("Child 1 Temp: ");
+  nodeName = doc["Node Name"].as<String>();
+
+  if(nodeName == "child1"){
+    child1_temperature = doc["child1_temperature"].as<double>();
+  }
+  else if(nodeName == "child2"){
+    child2_temperature = doc["child2_temperature"].as<double>();
+  }
+
+   // Extract child1 and child2 temperature values from the received message
+
+  // Store the received temperatures in your global variables
+  //child1_temperature = receivedChild1Temperature;
+  //child2_temperature = receivedChild2Temperature;
+  //child1_temperature = doc["child1_temperature"];
+  //child2_temperature = doc["child2_temperature"];
+  Serial.print("\nChild 1 Temp: ");
   Serial.println(child1_temperature);
   Serial.print("Child 2 Temp: ");
   Serial.println(child2_temperature);
@@ -177,8 +201,8 @@ void loop()
     //int temp = doc["Temp"].as<int>(); // Assuming Temp is of type int
 
     // reason behind getting last temperature even when child node 1 is down
-    double child1_temperature = doc["child1_temperature"].as<double>();
-    double child2_temperature = doc["child2_temperature"].as<double>();
+    child1_temperature = doc["child1_temperature"].as<double>();
+    child2_temperature = doc["child2_temperature"].as<double>();
     String msg1 = doc["msg1"].as<String>();
 
 
@@ -191,7 +215,7 @@ void loop()
   //Serial.printf("Node ID in loop: %u\n", mesh.getNodeId());
   //delay(100);
   mesh.update();
-  delay(1000);
+  //delay(1000);
   //Serial.println( "Blynk is " + Serial2.available());
 }
 
