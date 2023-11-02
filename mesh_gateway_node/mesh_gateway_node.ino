@@ -31,6 +31,7 @@ String msg1 = "";
 int temp;
 double child1_temperature;
 double child2_temperature;
+String nodeName = "";
 
 
 String DO,pH,Temp,Tds;
@@ -58,29 +59,28 @@ void sendMessage()
   doc["child1_temperature"] = child1_temperature;
   doc["child2_temperature"] = child2_temperature;
   doc["msg1"] = msg1;
-  //doc["status_1"] = led_status_1;
+ 
   String msg ;
   serializeJson(doc, msg);
   mesh.sendBroadcast( msg );
-  //Serial.println("Gateway to Mesh Broadcast - " + msg);
-
- // taskSendMessage.setInterval((TASK_SECOND * 1));
+ 
 }
  
 void send_request()
 {
   DynamicJsonDocument doc_request(1024);
   doc_request["type"] = "Data";  
-  doc_request["child1_temperature"] = child1_temperature; 
-  doc_request["child2_temperature"] = child2_temperature; 
-  //doc_request["Temp"] = temp;
+  String tempChild1 = String(child1_temperature);
+  String tempChild2 = String(child2_temperature);
+  doc_request["child1_temperature"] = tempChild1; 
+  doc_request["child2_temperature"] = tempChild2; 
+ 
   Serial.print("Sending Request - ");
   //Serial.println("IS Serial 2 available: " + Serial2.available());
-  serializeJson(doc_request, Serial); //{"type":"request"}
+  serializeJson(doc_request, Serial); //{"type":"Data","child1_temperature":0,"child2_temperature":0}
   Serial.println("");
   serializeJson(doc_request, Serial2);
-  //Serial.println("");
-  //taskSendMessage.setInterval((TASK_SECOND * 1));
+
 }
 
 
@@ -100,9 +100,16 @@ void receivedCallback( uint32_t from, String &msg ) {
   }
 
   msg1 = doc["msg1"].as<String>();
-  child1_temperature = doc["child1_temperature"];
-  child2_temperature = doc["child2_temperature"];
-  Serial.print("Child 1 Temp: ");
+  nodeName = doc["Node Name"].as<String>();
+
+  if(nodeName == "child1"){
+    child1_temperature = doc["child1_temperature"].as<double>();
+  }
+  else if(nodeName == "child2"){
+    child2_temperature = doc["child2_temperature"].as<double>();
+  }
+
+  Serial.print("\nChild 1 Temp: ");
   Serial.println(child1_temperature);
   Serial.print("Child 2 Temp: ");
   Serial.println(child2_temperature);
@@ -165,33 +172,21 @@ void loop()
   if(message_ready){
     Serial.println("Received from Serial2: " + message); 
 
-    //delay(2000); // delay here
 
     DynamicJsonDocument doc(1024);
     DeserializationError error = deserializeJson(doc, message);
     board_number = doc["board_number"];
     led = doc["led"];
     led_status = doc["status"];
-    //temp = doc["Temp"]; 
-    //msg1 = doc["msg1"];
-    //int temp = doc["Temp"].as<int>(); // Assuming Temp is of type int
 
     // reason behind getting last temperature even when child node 1 is down
-    double child1_temperature = doc["child1_temperature"].as<double>();
-    double child2_temperature = doc["child2_temperature"].as<double>();
+    child1_temperature = doc["child1_temperature"].as<double>();
+    child2_temperature = doc["child2_temperature"].as<double>();
     String msg1 = doc["msg1"].as<String>();
 
-
-    
-  
-    // it will run the user scheduler as well
-    //timer.run();
     message_ready  = false;
   }
-  //Serial.printf("Node ID in loop: %u\n", mesh.getNodeId());
-  //delay(100);
   mesh.update();
-  delay(1000);
-  //Serial.println( "Blynk is " + Serial2.available());
+  //delay(1000);
 }
 

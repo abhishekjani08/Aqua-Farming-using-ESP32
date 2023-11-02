@@ -13,7 +13,7 @@
 #define   MESH_PORT       5555
 #define LED_PIN 2 
 
-// Data wire is plugged into port 4
+// Data wire is plugged into port 5
 #define ONE_WIRE_BUS 5
 
 // Setup a oneWire instance to communicate with any OneWire devices 
@@ -24,7 +24,7 @@ DallasTemperature sensors(&oneWire);
 
 int led;
 int led_status = 0;
-int board_number = 0;
+int board_number = 2;
 String msg1 = "";
 String nodeName = "child2";
 Scheduler userScheduler; // to control your personal task
@@ -68,10 +68,10 @@ void receivedCallback( uint32_t from, String &msg)
   }
   else{
     digitalWrite(led, !led_status);
-    //Serial.println("Child Node 1 OFF");
+    //Serial.println("Child Node 2 OFF");
   }
 }
-Task taskSendMessage( TASK_SECOND * 1, TASK_FOREVER, &sendMessage );
+Task taskSendMessage( TASK_SECOND * 5, TASK_FOREVER, &sendMessage );
 
 void sendMessage()
 {
