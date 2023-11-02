@@ -1,9 +1,9 @@
 #define BLYNK_PRINT Serial
 
 // Anish's Credentials
-#define BLYNK_TEMPLATE_ID "TMPL3y-A5yv23"
+#define BLYNK_TEMPLATE_ID "TMPL3y-A5yv"
 #define BLYNK_TEMPLATE_NAME "Aqua Farming"
-#define BLYNK_AUTH_TOKEN "WfQITWPhO1JeF3zrRGXvt09vi14Ekms-"
+#define BLYNK_AUTH_TOKEN "WfQITWPhO1JeF3zrRGXvt09vi14Ek"
 
 // Necesaary Libraries
 #include <WiFi.h>
@@ -37,7 +37,7 @@ BLYNK_WRITE(V0) {
   board = 0;
   pin = LED_PIN;
   pin_status = param.asInt();  // Pin Status 1/0
-  Serial.println("V0 On");
+  Serial.println("\nV0 On");
 }
 
 
