@@ -1,0 +1,26 @@
+const int potPin=36;
+float ph;
+float Value=0.0;
+ 
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  // initialize digital pin GPIO18 as an output.
+  pinMode(18, OUTPUT);
+  pinMode(potPin,INPUT);
+  delay(1000);
+}
+ void loop(){
+ 
+    Value= analogRead(potPin);
+    Serial.print(Value);
+    Serial.print(" | ");
+    float voltage=Value*(3.3/4095.0);
+    ph=(3.3*voltage);
+    Serial.println(ph);
+    delay(1000);
+    digitalWrite(18, HIGH); // turn the LED on
+    delay(500);             // wait for 500 milliseconds
+    digitalWrite(18, LOW);  // turn the LED off
+    delay(500);             // wait for 500 milliseconds
+ }
