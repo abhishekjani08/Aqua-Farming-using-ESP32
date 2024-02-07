@@ -31,6 +31,8 @@ String msg1 = "";
 int temp;
 double child1_temperature;
 double child2_temperature;
+double child1_ph;
+int pH1;
 String nodeName = "";
 
 
@@ -58,6 +60,8 @@ void sendMessage()
   doc["status"] =  led_status;
   doc["child1_temperature"] = child1_temperature;
   doc["child2_temperature"] = child2_temperature;
+  //Serial.println("PH 1:" + pH1)
+  doc["child1_ph"] = child1_ph;
   doc["msg1"] = msg1;
  
   String msg ;
@@ -75,7 +79,7 @@ void send_request()
   doc_request["child1_temperature"] = tempChild1; 
   doc_request["child2_temperature"] = tempChild2; 
  
-  Serial.print("Sending Request - ");
+  Serial.print("/nSending Request - ");
   //Serial.println("IS Serial 2 available: " + Serial2.available());
   serializeJson(doc_request, Serial); //{"type":"Data","child1_temperature":0,"child2_temperature":0}
   Serial.println("");
@@ -104,6 +108,7 @@ void receivedCallback( uint32_t from, String &msg ) {
 
   if(nodeName == "child1"){
     child1_temperature = doc["child1_temperature"].as<double>();
+    child1_ph = doc["child1_ph"].as<double>();;
   }
   else if(nodeName == "child2"){
     child2_temperature = doc["child2_temperature"].as<double>();
@@ -111,13 +116,13 @@ void receivedCallback( uint32_t from, String &msg ) {
 
   Serial.print("\nChild 1 Temp: ");
   Serial.println(child1_temperature);
+  Serial.print("Child 1 PH: ");
+  Serial.println(child1_ph);
   Serial.print("Child 2 Temp: ");
   Serial.println(child2_temperature);
   Serial.println("Received in Gateway: " + msg1);
   serializeJson(doc, Serial); //{"type":"Data"}
   serializeJson(doc, Serial2);
- 
-
   }
 
 void newConnectionCallback(uint32_t nodeId) {
@@ -182,6 +187,8 @@ void loop()
     // reason behind getting last temperature even when child node 1 is down
     child1_temperature = doc["child1_temperature"].as<double>();
     child2_temperature = doc["child2_temperature"].as<double>();
+
+    child1_ph = doc["child1_ph"].as<double>();;
     String msg1 = doc["msg1"].as<String>();
 
     message_ready  = false;
@@ -189,4 +196,3 @@ void loop()
   mesh.update();
   //delay(1000);
 }
-
