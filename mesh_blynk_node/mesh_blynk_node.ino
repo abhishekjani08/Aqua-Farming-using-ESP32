@@ -1,6 +1,4 @@
 #define BLYNK_PRINT Serial
-// 23, ms-
-// Anish's Credentials
 #define BLYNK_TEMPLATE_ID "TMPL3y-A5yv"
 #define BLYNK_TEMPLATE_NAME "Aqua Farming"
 #define BLYNK_AUTH_TOKEN "WfQITWPhO1JeF3zrRGXvt09vi14Ek"
@@ -96,6 +94,7 @@ void loop() {
 
         double child1_temperature = doc["child1_temperature"].as<double>();
         double child2_temperature = doc["child2_temperature"].as<double>();
+        double child1_ph = doc["child1_ph"].as<double>();
 
         //doc.clear(); // Clear the document for the response
 
@@ -106,11 +105,11 @@ void loop() {
         doc["status"] = pin_status;
         doc["child1_temperature"] = child1_temperature;
         doc["child2_temperature"] = child2_temperature;
-
+        doc["child1_ph"] = child1_ph;
 
         Serial.println("Temperature Child 1: " + String(child1_temperature));
         Serial.println("Temperature Child 2: " + String(child2_temperature));
-
+        Serial.println("Child 1 Ph: " + String(child1_ph));
 
         serializeJson(doc, Serial2);  // Sending data to another ESP32
         //Serial.println("");
@@ -120,6 +119,7 @@ void loop() {
         // Update Blynk virtual pin
         Blynk.virtualWrite(V5, child1_temperature);
         Blynk.virtualWrite(V6, child2_temperature);
+        Blynk.virtualWrite(V10, child1_ph);
         // Get data from virtual pin
         // Blynk.virtualWrite(V3,doc["DO"].as<String>());
         // Blynk.virtualWrite(V4,doc["pH"].as<String>());
