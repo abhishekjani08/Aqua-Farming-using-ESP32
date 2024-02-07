@@ -87,7 +87,7 @@ void sendMessage()
   //json doc
   doc["type"] = "Data";
   sensors.requestTemperatures(); 
-  
+
   //Serial.print("Celsius temperature: ");
   //Serial.print(sensors.getTempCByIndex(0)); 
  
@@ -144,7 +144,6 @@ void setup() {
   userScheduler.addTask( taskSendMessage );
   Serial.println("\n");
   taskSendMessage.enable();
- 
 }
 
 // Other code remains unchanged
@@ -159,17 +158,13 @@ void readSensor() {
 
   // Convert voltage to pH using the Nernst equation
   // pH = slope * voltage + intercept
-  float slope = -9.70; // Adjust based on your calibration
+  float slope = -9.35; // Adjust based on your calibration
   float intercept = 21.34; // Adjust based on your calibration
   ph = slope * voltage + intercept;
 
   Serial.print(" | pH: ");
   Serial.println(ph, 2);
 }
-
-
-
-
 
 void loop() {
 
