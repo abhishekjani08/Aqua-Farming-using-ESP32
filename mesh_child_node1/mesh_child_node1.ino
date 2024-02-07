@@ -16,6 +16,10 @@
 // Data wire is plugged into port 5
 #define ONE_WIRE_BUS 5
 
+const int potPin = 36;
+double ph;
+float Value = 0.0;
+
 // Setup a oneWire instance to communicate with any OneWire devices 
 OneWire oneWire(ONE_WIRE_BUS);
 
@@ -31,6 +35,8 @@ Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
 double child1_temperature;
 double child2_temperature;
+double temp1;
+double child1_ph;
 
 
 // Needed for painless library
@@ -56,9 +62,8 @@ void receivedCallback( uint32_t from, String &msg)
   msg1 = doc["msg1"].as<String>();
   child1_temperature = doc["child1_temperature"].as<double>();
   child2_temperature = doc["child2_temperature"].as<double>();
+  child1_ph = doc["child1_ph"].as<double>();
 
-
-  Serial.println("");
   Serial.println("Received in Child Node 1: " + json);
   
   if (board_number == 1 && led_status == 1){
@@ -88,7 +93,10 @@ void sendMessage()
  
  
   double temp = sensors.getTempCByIndex(0);
-  doc["child1_temperature"] = temp;
+  temp1=round(temp*100)/100.0;
+  ph=round(ph*100)/100.0;
+  doc["child1_temperature"] = temp1;
+  doc["child1_ph"] = ph;
   doc["Node Name"] = nodeName;
   doc["msg1"] = msg1;
   doc["led_status"] = led_status;
@@ -117,6 +125,8 @@ void setup() {
   pinMode(LED_PIN, OUTPUT); 
   digitalWrite(LED_PIN,LOW);
   sensors.begin();
+  pinMode(potPin, INPUT);
+  delay(1000);
 
   //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
   mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );  // set before init() so that you can see startup messages
@@ -137,8 +147,35 @@ void setup() {
  
 }
 
+// Other code remains unchanged
+
+void readSensor() {
+  Value = analogRead(potPin);
+
+  // Convert analog reading to voltage
+  float voltage = Value * (3.3 / 4095.0);
+  Serial.print("Temperature-1 : ");
+  Serial.print(String(temp1));
+
+  // Convert voltage to pH using the Nernst equation
+  // pH = slope * voltage + intercept
+  float slope = -9.70; // Adjust based on your calibration
+  float intercept = 21.34; // Adjust based on your calibration
+  ph = slope * voltage + intercept;
+
+  Serial.print(" | pH: ");
+  Serial.println(ph, 2);
+}
+
+
+
+
+
 void loop() {
-  // it will run the user scheduler as well
-  
+
+  readSensor();
+
+  // Your other mesh-related code
   mesh.update();
+  delay(1000);
 }
