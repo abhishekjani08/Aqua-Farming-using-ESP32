@@ -1,7 +1,7 @@
 #define BLYNK_PRINT Serial
-#define BLYNK_TEMPLATE_ID "TMPL3y-A5yv"
+#define BLYNK_TEMPLATE_ID "TMPL3y-A5yv23"
 #define BLYNK_TEMPLATE_NAME "Aqua Farming"
-#define BLYNK_AUTH_TOKEN "WfQITWPhO1JeF3zrRGXvt09vi14Ek"
+#define BLYNK_AUTH_TOKEN "WfQITWPhO1JeF3zrRGXvt09vi14Ekms-"
 
 // Necesaary Libraries
 #include <WiFi.h>
@@ -136,4 +136,5 @@ void loop() {
   }
 
   Blynk.run();  // Handling Blynk Services
+  delay(10);  // Introduce a small delay
 }
