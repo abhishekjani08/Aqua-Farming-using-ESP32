@@ -16,6 +16,10 @@
 // Data wire is plugged into port 5
 #define ONE_WIRE_BUS 5
 
+const int potPin = 36;
+double ph;
+float Value = 0.0;
+
 // Setup a oneWire instance to communicate with any OneWire devices 
 OneWire oneWire(ONE_WIRE_BUS);
 
@@ -24,13 +28,16 @@ DallasTemperature sensors(&oneWire);
 
 int led;
 int led_status = 0;
-int board_number = 1;
+int board_number = 2;
 String msg1 = "";
-String nodeName = "child1";
+String nodeName = "child2";
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
 double child1_temperature;
 double child2_temperature;
+double temp2;
+double child1_ph;
+double child2_ph;
 
 
 // Needed for painless library
@@ -56,26 +63,26 @@ void receivedCallback( uint32_t from, String &msg)
   msg1 = doc["msg1"].as<String>();
   child1_temperature = doc["child1_temperature"].as<double>();
   child2_temperature = doc["child2_temperature"].as<double>();
+  child1_ph = doc["child1_ph"].as<double>();
+  child2_ph = doc["child2_ph"].as<double>();
 
-
-  Serial.println("");
-  Serial.println("Received in Child Node 1: " + json);
+  Serial.println("Received in Child Node 2: " + json);
   
-  if (board_number == 1 && led_status == 1){
+  if (board_number == 2 && led_status == 1){
     digitalWrite(led, led_status);
-    Serial.println("Child Node 1 ON");
+    Serial.println("Child Node 2 ON");
 
   }
   else{
     digitalWrite(led, !led_status);
-    //Serial.println("Child Node 2 OFF");
+    //Serial.println("Child Node 1 OFF");
   }
 }
 Task taskSendMessage( TASK_SECOND * 5, TASK_FOREVER, &sendMessage );
 
 void sendMessage()
 {
-  msg1 = "Hello from Child Node 1";
+  msg1 = "Hello from Child Node 2";
   //mesh.sendBroadcast(msg1);
   DynamicJsonDocument doc(1024);
   // Tempature 
@@ -88,7 +95,10 @@ void sendMessage()
  
  
   double temp = sensors.getTempCByIndex(0);
-  doc["child1_temperature"] = temp;
+  temp2=round(temp*100)/100.0;
+  ph=round(ph*100)/100.0;
+  doc["child2_temperature"] = temp2;
+  doc["child2_ph"] = ph;
   doc["Node Name"] = nodeName;
   doc["msg1"] = msg1;
   doc["led_status"] = led_status;
@@ -117,10 +127,12 @@ void setup() {
   pinMode(LED_PIN, OUTPUT); 
   digitalWrite(LED_PIN,LOW);
   sensors.begin();
+  pinMode(potPin, INPUT);
+  delay(1000);
 
   //mesh.setDebugMsgTypes( ERROR | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES | REMOTE ); // all types on
   mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );  // set before init() so that you can see startup messages
-  //mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  // set before init() so that you can see startup messages
+  // mesh.setDebugMsgTypes( ERROR | STARTUP | MESH_STATUS | CONNECTION | SYNC | COMMUNICATION | GENERAL | MSG_TYPES );  // set before init() so that you can see startup messages
   mesh.init( MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT );
   Serial.println("\n");
   mesh.onReceive(&receivedCallback);
@@ -143,8 +155,8 @@ void readSensor() {
 
   // Convert analog reading to voltage
   float voltage = Value * (3.3 / 4095.0);
-  Serial.print("Temperature-1 : ");
-  Serial.print(String(temp1));
+  Serial.print("Temperature-2 : ");
+  Serial.print(String(temp2));
 
   // Convert voltage to pH using the Nernst equation
   // pH = slope * voltage + intercept
@@ -157,8 +169,10 @@ void readSensor() {
 }
 
 void loop() {
-  // it will run the user scheduler as well
-  
+
+  readSensor();
+
+  // Your other mesh-related code
   mesh.update();
-  delay(10);
+  delay(1000);
 }

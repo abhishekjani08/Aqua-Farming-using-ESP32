@@ -11,6 +11,7 @@
 #include <BlynkSimpleEsp32.h>
 #include <ArduinoJson.h>
 
+// Serial2 pins of ESP32
 #define RXD2 16
 #define TXD2 17
 
@@ -20,6 +21,7 @@ char auth[] = BLYNK_AUTH_TOKEN;
 char ssid[] = "iot";
 char pass[] = "123456789";
 
+// Variables
 int board;
 int pin;
 bool pin_status;
@@ -29,8 +31,10 @@ double child1_temperature;
 double child1_ph;
 double child2_temperature;
 double child2_ph;
+double child3_temperature;
+double child3_ph;
 
-#define LED_PIN 2
+#define LED_PIN 2  // LED is usually connected to D2 pin. Change if needed.
 
 BLYNK_WRITE(V0) {
   board = 0;
@@ -39,19 +43,22 @@ BLYNK_WRITE(V0) {
   Serial.println("V0 On");
 }
 
+
+// Data Coming from Blynk App
 BLYNK_WRITE(V1) {
   board = 1;
   pin = LED_PIN;
-  pin_status = param.asInt();
+  pin_status = param.asInt();  // Pin Status 1/0
+  //Serial.println(pin_status);
   Serial.println("\nV1 On");
 }
 
-BLYNK_WRITE(V2) {
-  board = 2;
-  pin = LED_PIN;
-  pin_status = param.asInt();
-  Serial.println("\nV2 On");
-}
+// BLYNK_WRITE(V2) {
+//   board = 2;
+//   pin = LED_PIN;
+//   pin_status = param.asInt();
+//   Serial.println("\nV2 On");
+// }
 
 void setup()
 {
@@ -85,6 +92,8 @@ void loop()
     {
       Serial.print("deserializeJson() failed: ");
       Serial.println(error.c_str());
+      messageReady = false;
+      return;
     }
 
     if (doc["type"] == "Data")
@@ -103,6 +112,12 @@ void loop()
       double ph2 = doc["child2_ph"].as<double>();
       Serial.println("Ph Child 2- " + String(ph2));
 
+      double temperature3 = doc["child3_temperature"].as<double>();
+      Serial.println("Temperature Child 3- " + String(temperature3));
+
+      double ph3 = doc["child3_ph"].as<double>();
+      Serial.println("Ph Child 3- " + String(ph3));
+
       doc["type"] = "response";
       // Get data from virtual pin
       doc["board_status"] = board;
@@ -112,6 +127,8 @@ void loop()
       doc["child1_temperature"] = child1_temperature;
       doc["child2_ph"] = child2_ph;
       doc["child2_temperature"] = child2_temperature;
+      doc["child3_ph"] = child3_ph;
+      doc["child3_temperature"] = child3_temperature;
 
       // Sending data to another ESP32
       String json;
@@ -122,6 +139,7 @@ void loop()
       // Update Blynk virtual pin
       Blynk.virtualWrite(V5, temperature1);
       Blynk.virtualWrite(V6, temperature2);
+      Blynk.virtualWrite(V2, temperature3);
       Blynk.virtualWrite(V10, ph1);
       Blynk.virtualWrite(V9, ph2);
       // Get data from virtual pin

@@ -1,3 +1,4 @@
+// Necessary Libraries
 #include "painlessMesh.h"
 #include <ArduinoJson.h>
 #include <SPI.h>
@@ -5,6 +6,8 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 
+
+// Serial2 pins of ESP32
 #define RXD2 16
 #define TXD2 17
 
@@ -28,10 +31,13 @@ String msg1 = "";
 int temp;
 double child1_temperature;
 double child2_temperature;
+double child3_temperature;
 double child1_ph;
 double child2_ph;
+double child3_ph;
 int pH1;
 int pH2;
+int pH3;
 String nodeName = "";
 
 
@@ -48,10 +54,9 @@ void send_request(); // Sends data serially to Blynk Node
 
 Task taskSendMessage(TASK_SECOND *1, TASK_FOREVER, &sendMessage);
 Task taskSendRequest(TASK_SECOND *1, TASK_FOREVER, &send_request);
-Task taskSendMessage(TASK_SECOND *1, TASK_FOREVER, &sendMessage);
-Task taskSendRequest(TASK_SECOND *1, TASK_FOREVER, &send_request);
 
-void sendMessage() {
+void sendMessage()
+{
   uint32_t nodeId = mesh.getNodeId();
   msg1 = "Hello from Gateway Node with Node ID: " + String(nodeId);
   DynamicJsonDocument doc(1024);
@@ -60,13 +65,15 @@ void sendMessage() {
   doc["status"] = led_status;
   doc["child1_temperature"] = child1_temperature;
   doc["child2_temperature"] = child2_temperature;
+  doc["child3_temperature"] = child3_temperature;
+  //Serial.println("PH 1:" + pH1)
   doc["child1_ph"] = child1_ph;
   doc["child2_ph"] = child2_ph;
+  doc["child3_ph"] = child3_ph;
   doc["msg1"] = msg1;
 
   String msg;
   serializeJson(doc, msg);
-  mesh.sendBroadcast(msg);
   mesh.sendBroadcast(msg);
 }
 
@@ -76,12 +83,16 @@ void send_request()
   doc_request["type"] = "Data";
   String tempChild1 = String(child1_temperature, 2);
   String tempChild2 = String(child2_temperature, 2);
+  String tempChild3 = String(child3_temperature, 2);
   String phChild1 = String(child1_ph, 2);
   String phChild2 = String(child2_ph, 2);
+  String phChild3 = String(child3_ph, 2);
   doc_request["child1_temperature"] = tempChild1;
   doc_request["child2_temperature"] = tempChild2;
+  doc_request["child3_temperature"] = tempChild3;
   doc_request["child1_ph"] = phChild1;
   doc_request["child2_ph"] = phChild2;
+  doc_request["child3_ph"] = phChild3;
 
   Serial.print("Sending Request - ");
   //Serial.println("IS Serial 2 available: " + Serial2.available());
@@ -100,7 +111,8 @@ void receivedCallback(uint32_t from, String &msg)
   DynamicJsonDocument doc(1024);
   json = msg.c_str();
   DeserializationError error = deserializeJson(doc, json);
-  if (error) {
+  if (error)
+  {
     Serial.print("deserializeJson() failed: ");
     Serial.println(error.c_str());
   }
@@ -110,25 +122,40 @@ void receivedCallback(uint32_t from, String &msg)
 
   if (nodeName == "child1")
   {
+    Serial.println("Child 1 if statement");
     child1_temperature = doc["child1_temperature"].as<double>();
     child1_ph = doc["child1_ph"].as<double>();
   }
-  else if (nodeName == "child2")
+  if (nodeName == "child2")
   {
+    Serial.println("Child 2 if statement");
     child2_temperature = doc["child2_temperature"].as<double>();
     child2_ph = doc["child2_ph"].as<double>();
   }
+  if (nodeName == "child3")
+  {
+    Serial.println("Child 3 if statement");
+    child3_temperature = doc["child3_temperature"].as<double>();
+    child3_ph = doc["child3_ph"].as<double>();
+  }
 
   Serial.print("Child 1 Temp: ");
-  Serial.println(child1_temperature);
-  Serial.print("Child 1 PH: ");
+  Serial.print(child1_temperature);
+  Serial.print(", Child 1 PH: ");
   Serial.println(child1_ph);
+
   Serial.print("Child 2 Temp: ");
-  Serial.println(child2_temperature);
-  Serial.print("Child 2 PH: ");
+  Serial.print(child2_temperature);
+  Serial.print(", Child 2 PH: ");
   Serial.println(child2_ph);
+
+  Serial.print("Child 3 Temp: ");
+  Serial.print(child3_temperature);
+  Serial.print(", Child 3 PH: ");
+  Serial.println(child3_ph);
+  
   Serial.println("Received in Gateway: " + msg1);
-  serializeJson(doc, Serial);
+  serializeJson(doc, Serial); //{"type":"Data"}
   serializeJson(doc, Serial2);
 }
 
@@ -172,6 +199,7 @@ void setup()
   userScheduler.addTask(taskSendRequest);
   taskSendMessage.enable();
   taskSendRequest.enable();
+  // timer.setInterval(1000L, send_request);
 }
 
 void loop()
@@ -194,16 +222,18 @@ void loop()
     led = doc["led"];
     led_status = doc["status"];
 
+    // reason behind getting last temperature even when child node 1 is down
     child1_temperature = doc["child1_temperature"].as<double>();
     child2_temperature = doc["child2_temperature"].as<double>();
+    child3_temperature = doc["child3_temperature"].as<double>();
 
     child1_ph = doc["child1_ph"].as<double>();
     child2_ph = doc["child2_ph"].as<double>();
+    child3_ph = doc["child3_ph"].as<double>();
     String msg1 = doc["msg1"].as<String>();
 
     message_ready = false;
   }
-
   mesh.update();
-  delay(10);  // Introduce a small dela
+  delay(10);
 }
