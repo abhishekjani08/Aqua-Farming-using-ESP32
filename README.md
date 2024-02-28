@@ -2,6 +2,11 @@
 
 [Mesh Network Website](https://randomnerdtutorials.com/esp-mesh-esp32-esp8266-painlessmesh/)
 
+
+## Temperature Sensor Image
+
+![Image](./Images/esp32-temperature-sensor.jpg)
+
 ## Installation Instruction
 
 _Download Arduino IDE from the official website_
