@@ -11,7 +11,6 @@
 #include <BlynkSimpleEsp32.h>
 #include <ArduinoJson.h>
 
-// Serial2 pins of ESP32
 #define RXD2 16
 #define TXD2 17
 
@@ -21,7 +20,6 @@ char auth[] = BLYNK_AUTH_TOKEN;
 char ssid[] = "iot";
 char pass[] = "123456789";
 
-// Variables
 int board;
 int pin;
 bool pin_status;
@@ -32,7 +30,7 @@ double child1_ph;
 double child2_temperature;
 double child2_ph;
 
-#define LED_PIN 2  // LED is usually connected to D2 pin. Change if needed.
+#define LED_PIN 2
 
 BLYNK_WRITE(V0) {
   board = 0;
@@ -41,13 +39,10 @@ BLYNK_WRITE(V0) {
   Serial.println("V0 On");
 }
 
-
-// Data Coming from Blynk App
 BLYNK_WRITE(V1) {
   board = 1;
   pin = LED_PIN;
-  pin_status = param.asInt();  // Pin Status 1/0
-  //Serial.println(pin_status);
+  pin_status = param.asInt();
   Serial.println("\nV1 On");
 }
 
@@ -90,8 +85,6 @@ void loop()
     {
       Serial.print("deserializeJson() failed: ");
       Serial.println(error.c_str());
-      messageReady = false;
-      return;
     }
 
     if (doc["type"] == "Data")

@@ -1,0 +1,105 @@
+#define BLYNK_PRINT Serial
+#define BLYNK_TEMPLATE_ID "TMPL3y-A5yv23"
+#define BLYNK_TEMPLATE_NAME "Aqua Farming"
+#define BLYNK_AUTH_TOKEN "WfQITWPhO1JeF3zrRGXvt09vi14Ekms-"
+
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
+#include <ArduinoJson.h>
+
+#define RXD2 16
+#define TXD2 17
+
+char auth[] = BLYNK_AUTH_TOKEN;
+char ssid[] = "iot";
+char pass[] = "123456789";
+
+int board;
+int pin;
+bool pin_status;
+String message = "";
+bool messageReady = false;
+
+#define LED_PIN 2
+
+BLYNK_WRITE(V0) {
+  board = 0;
+  pin = LED_PIN;
+  pin_status = param.asInt();
+  Serial.println("\nV0 On");
+}
+
+BLYNK_WRITE(V1) {
+  board = 1;
+  pin = LED_PIN;
+  pin_status = param.asInt();
+  Serial.println("\nV1 On");
+}
+
+BLYNK_WRITE(V2) {
+  board = 2;
+  pin = LED_PIN;
+  pin_status = param.asInt();
+  Serial.println("\nV2 On");
+}
+
+void setup() {
+  Serial.begin(115200);
+  Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+}
+
+void loop() {
+  if (Serial2.available()) {
+    message = Serial2.readString();
+    Serial.print("\nSerial2 available in Blynk node:");
+    Serial.println(message);
+    messageReady = true;
+  }
+
+  if (messageReady) {
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, message);
+
+    Serial.println("Received from Serial2: " + message);
+
+    if (!error && doc["type"] == "Data") {
+      Serial.println("Received Type = Data in Blynk Node");
+
+      double child1_temperature = doc["child1_temperature"].as<double>();
+      double child2_temperature = doc["child2_temperature"].as<double>();
+      double child1_ph = doc["child1_ph"].as<double>();
+
+      doc.clear();
+      doc["type"] = "response";
+      doc["board_number"] = board;
+      doc["led"] = pin;
+      doc["status"] = pin_status;
+      doc["child1_temperature"] = child1_temperature;
+      doc["child2_temperature"] = child2_temperature;
+      doc["child1_ph"] = child1_ph;
+
+      Serial.print("Sending Data in JSON - ");
+      serializeJson(doc, Serial);
+      serializeJson(doc, Serial2);
+
+      Serial.println("\nTemperature Child 1: " + String(child1_temperature));
+      Serial.println("Temperature Child 2: " + String(child2_temperature));
+      Serial.println("Child 1 Ph: " + String(child1_ph));
+
+      // Update Blynk virtual pin
+      Blynk.virtualWrite(V5, child1_temperature);
+      Blynk.virtualWrite(V6, child2_temperature);
+      Blynk.virtualWrite(V10, child1_ph);
+    } else {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.c_str());
+    }
+
+    messageReady = false;
+  }
+
+  Blynk.run();
+  delay(10);
+}
