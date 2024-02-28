@@ -6,6 +6,7 @@
 ## Temperature Sensor Image
 
 ![Image](./Images/esp32-temperature-sensor.jpg)
+<!-- ![Image](https://esp32io.com/images/cover/esp32-temperature-sensor.jpg) -->
 
 ## Installation Instruction
 
