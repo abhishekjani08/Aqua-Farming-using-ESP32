@@ -64,7 +64,7 @@ void receivedCallback( uint32_t from, String &msg)
   child1_temperature = doc["child1_temperature"].as<double>();
   child2_temperature = doc["child2_temperature"].as<double>();
   child1_ph = doc["child1_ph"].as<double>();
-  child2_ph = doc["child1_ph"].as<double>();
+  child2_ph = doc["child2_ph"].as<double>();
 
   Serial.println("Received in Child Node 2: " + json);
   
