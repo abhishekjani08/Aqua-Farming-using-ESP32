@@ -173,5 +173,5 @@ void loop() {
 
   // Your other mesh-related code
   mesh.update();
-  delay(10);
+  delay(1000);
 }
