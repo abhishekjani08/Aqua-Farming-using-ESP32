@@ -1,8 +1,11 @@
 #define BLYNK_PRINT Serial
+
+// Anish's Credentials
 #define BLYNK_TEMPLATE_ID "TMPL3y-A5yv23"
 #define BLYNK_TEMPLATE_NAME "Aqua Farming"
 #define BLYNK_AUTH_TOKEN "WfQITWPhO1JeF3zrRGXvt09vi14Ekms-"
 
+// Necessary Libraries
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <BlynkSimpleEsp32.h>
@@ -12,6 +15,8 @@
 #define TXD2 17
 
 char auth[] = BLYNK_AUTH_TOKEN;
+
+// Your WiFi credentials.
 char ssid[] = "iot";
 char pass[] = "123456789";
 
@@ -20,14 +25,18 @@ int pin;
 bool pin_status;
 String message = "";
 bool messageReady = false;
+double child1_temperature;
+double child1_ph;
+double child2_temperature;
+double child2_ph;
 
 #define LED_PIN 2
 
 BLYNK_WRITE(V0) {
   board = 0;
   pin = LED_PIN;
-  pin_status = param.asInt();
-  Serial.println("\nV0 On");
+  pin_status = param.asInt();  // Pin Status 1/0
+  Serial.println("V0 On");
 }
 
 BLYNK_WRITE(V1) {
@@ -44,62 +53,86 @@ BLYNK_WRITE(V2) {
   Serial.println("\nV2 On");
 }
 
-void setup() {
-  Serial.begin(115200);
-  Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
-  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+void setup()
+{
+  // Debug console
+  Serial.begin(115200); // For Debugging purpose
+  Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2); // For sending data to another ESP32
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);    // Establishing Communication with Blynk Server
 }
 
-void loop() {
-  if (Serial2.available()) {
+void loop()
+{
+  while (Serial2.available()) //
+  {
     message = Serial2.readString();
-    Serial.print("\nSerial2 available in Blynk node:");
-    Serial.println(message);
+    //Serial.println(message);
     messageReady = true;
+
+    Serial.println("Serial2 available in blynk node:");
+    // Serial.println(message);
+    // Serial.println();
   }
 
-  if (messageReady) {
-    DynamicJsonDocument doc(1024);
+  // Only process message if there's one
+  if (messageReady)
+  {
+    // The only messages we'll parse will be formatted in JSON
+    DynamicJsonDocument doc(1024); // ArduinoJson version 6+
+    // Attempt to deserialize the message
     DeserializationError error = deserializeJson(doc, message);
-
-    Serial.println("Received from Serial2: " + message);
-
-    if (!error && doc["type"] == "Data") {
-      Serial.println("Received Type = Data in Blynk Node");
-
-      double child1_temperature = doc["child1_temperature"].as<double>();
-      double child2_temperature = doc["child2_temperature"].as<double>();
-      double child1_ph = doc["child1_ph"].as<double>();
-
-      doc.clear();
-      doc["type"] = "response";
-      doc["board_number"] = board;
-      doc["led"] = pin;
-      doc["status"] = pin_status;
-      doc["child1_temperature"] = child1_temperature;
-      doc["child2_temperature"] = child2_temperature;
-      doc["child1_ph"] = child1_ph;
-
-      Serial.print("Sending Data in JSON - ");
-      serializeJson(doc, Serial);
-      serializeJson(doc, Serial2);
-
-      Serial.println("\nTemperature Child 1: " + String(child1_temperature));
-      Serial.println("Temperature Child 2: " + String(child2_temperature));
-      Serial.println("Child 1 Ph: " + String(child1_ph));
-
-      // Update Blynk virtual pin
-      Blynk.virtualWrite(V5, child1_temperature);
-      Blynk.virtualWrite(V6, child2_temperature);
-      Blynk.virtualWrite(V10, child1_ph);
-    } else {
-      Serial.print(F("deserializeJson() failed: "));
+    if (error)
+    {
+      Serial.print("deserializeJson() failed: ");
       Serial.println(error.c_str());
     }
 
+    if (doc["type"] == "Data")
+    {
+      Serial.println("Received Type = Data in Blynk Node");
+
+      double temperature1 = doc["child1_temperature"].as<double>();
+      Serial.println("Temperature Child 1- " + String(temperature1));
+
+      double ph1 = doc["child1_ph"].as<double>();
+      Serial.println("Ph Child 1- " + String(ph1));
+
+      double temperature2 = doc["child2_temperature"].as<double>();
+      Serial.println("Temperature Child 2- " + String(temperature2));
+
+      double ph2 = doc["child2_ph"].as<double>();
+      Serial.println("Ph Child 2- " + String(ph2));
+
+      doc["type"] = "response";
+      // Get data from virtual pin
+      doc["board_status"] = board;
+      doc["led"] = pin;
+      doc["status"] = pin_status;
+      doc["child1_ph"] = child1_ph;
+      doc["child1_temperature"] = child1_temperature;
+      doc["child2_ph"] = child2_ph;
+      doc["child2_temperature"] = child2_temperature;
+
+      // Sending data to another ESP32
+      String json;
+      serializeJson(doc, json);
+      Serial.println("Sending Data: " + json);
+      Serial2.println(json);
+
+      // Update Blynk virtual pin
+      Blynk.virtualWrite(V5, temperature1);
+      Blynk.virtualWrite(V6, temperature2);
+      Blynk.virtualWrite(V10, ph1);
+      Blynk.virtualWrite(V9, ph2);
+      // Get data from virtual pin
+      // Blynk.virtualWrite(V3, doc["DO"].as<String>());
+      // Blynk.virtualWrite(V4, doc["pH"].as<String>());
+      //Blynk.virtualWrite(V5,doc["Temp"].as<String>());
+      // Blynk.virtualWrite(V6, doc["Tds"].as<String>());
+    }
     messageReady = false;
   }
-
-  Blynk.run();
-  delay(10);
+  delay(1000);
+  Blynk.run(); // Handling Blynk Services
+  Serial.println("No Serial Communication");
 }
