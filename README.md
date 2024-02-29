@@ -30,3 +30,7 @@ _Download Arduino IDE from the official website_
 Download and Install [CP210x Windows Drivers](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers?tab=downloads)
 
 **Note:** The name of the driver is written on the chip of ESP32 Board
+
+## References
+https://www.researchgate.net/figure/Wireless-networking-with-a-star-topology_fig4_374005972
+![Image](./Images/Wireless-networking-with-a-star-topology.png)
