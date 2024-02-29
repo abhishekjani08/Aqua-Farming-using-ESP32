@@ -1,6 +1,6 @@
 #define BLYNK_PRINT Serial
 
-// Blynk's Credentials Major Project
+// Blynk's Credentials
 #define BLYNK_TEMPLATE_ID "TMPL3c4acbmrJ"
 #define BLYNK_TEMPLATE_NAME "Major Project"
 #define BLYNK_AUTH_TOKEN "sjiDRT8_iO0iq4fb3WObFFD0GzzU635t"
@@ -42,12 +42,16 @@ double child1_ph;
 
 
 // Data Coming from Blynk App
-BLYNK_WRITE(V1) {
+BLYNK_WRITE(V3) {
   board = 1;
   pin = LED_PIN;
   pin_status = param.asInt();  // Pin Status 1/0
   //Serial.println(pin_status);
-  Serial.println("\nV1 On");
+  if(pin_status == 1){
+    Serial.println("Motor 1 On");
+  }else{
+    Serial.println("Motor 1 Off");
+  }
 }
 
 // BLYNK_WRITE(V2) {
@@ -122,7 +126,7 @@ void loop()
 
       doc["type"] = "response";
       // Get data from virtual pin
-      doc["board_status"] = board;
+      doc["board_number"] = board;
       doc["led"] = pin;
       doc["status"] = pin_status;
       doc["child1_ph"] = ph1;
