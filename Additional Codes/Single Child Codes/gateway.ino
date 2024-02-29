@@ -46,7 +46,7 @@ painlessMesh mesh;
 void sendMessage(); // Prototype so PlatformIO doesn't complain/ Used to Broadcast Message to all Child Nodes
 void send_request(); // Sends data serially to Blynk Node
 
-Task taskSendMessage(TASK_SECOND *5, TASK_FOREVER, &sendMessage);
+Task taskSendMessage(TASK_SECOND *1, TASK_FOREVER, &sendMessage);
 Task taskSendRequest(TASK_SECOND *1, TASK_FOREVER, &send_request);
 
 void sendMessage()
@@ -161,7 +161,7 @@ void setup()
   userScheduler.addTask(taskSendRequest);
   taskSendMessage.enable();
   taskSendRequest.enable();
-  taskSendRequest.enableDelayed();
+  //taskSendRequest.enableDelayed();
 
   // timer.setInterval(1000L, send_request);
 }
@@ -199,6 +199,6 @@ void loop()
     message_ready = false;
   }
   mesh.update();
-  userScheduler.execute(); // Execute tasks
+  //userScheduler.execute(); // Execute tasks
   delay(10);
 }
