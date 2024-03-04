@@ -12,7 +12,7 @@
 #define TXD2 17
 
 // WiFi Credentials for Mesh Networking
-#define MESH_PREFIX "meshnetwork"
+#define MESH_PREFIX "meshnetwork2"
 #define MESH_PASSWORD "123456789"
 #define MESH_PORT 5555
 

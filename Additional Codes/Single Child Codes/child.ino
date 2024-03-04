@@ -8,7 +8,7 @@
 
  
 // WiFi Credentials
-#define   MESH_PREFIX     "meshnetwork"
+#define   MESH_PREFIX     "meshnetwork2"
 #define   MESH_PASSWORD   "123456789"
 #define   MESH_PORT       5555
 #define LED_PIN 2 
@@ -160,7 +160,7 @@ void readSensor() {
 
   // Convert voltage to pH using the Nernst equation
   // pH = slope * voltage + intercept
-  float slope = -9.35; // Adjust based on your calibration
+  float slope = -6.35; // Adjust based on your calibration
   float intercept = 21.34; // Adjust based on your calibration
   ph = slope * voltage + intercept;
 
