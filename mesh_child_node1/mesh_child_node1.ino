@@ -28,14 +28,14 @@ DallasTemperature sensors(&oneWire);
 
 int led;
 int led_status = 0;
-int board_number = 2;
+int board_number = 1;
 String msg1 = "";
-String nodeName = "child2";
+String nodeName = "child1";
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
+double temp1;
 double child1_temperature;
 double child2_temperature;
-double temp2;
 double child1_ph;
 double child2_ph;
 
@@ -66,11 +66,11 @@ void receivedCallback( uint32_t from, String &msg)
   child1_ph = doc["child1_ph"].as<double>();
   child2_ph = doc["child2_ph"].as<double>();
 
-  Serial.println("Received in Child Node 2: " + json);
+  Serial.println("Received in Child Node 1: " + json);
   
-  if (board_number == 2 && led_status == 1){
+  if (board_number == 1 && led_status == 1){
     digitalWrite(led, led_status);
-    Serial.println("Child Node 2 ON");
+    Serial.println("Child Node 1 ON");
 
   }
   else{
@@ -82,7 +82,7 @@ Task taskSendMessage( TASK_SECOND * 5, TASK_FOREVER, &sendMessage );
 
 void sendMessage()
 {
-  msg1 = "Hello from Child Node 2";
+  msg1 = "Hello from Child Node 1";
   //mesh.sendBroadcast(msg1);
   DynamicJsonDocument doc(1024);
   // Tempature 
@@ -95,10 +95,10 @@ void sendMessage()
  
  
   double temp = sensors.getTempCByIndex(0);
-  temp2=round(temp*100)/100.0;
+  temp1=round(temp*100)/100.0;
   ph=round(ph*100)/100.0;
-  doc["child2_temperature"] = temp2;
-  doc["child2_ph"] = ph;
+  doc["child1_temperature"] = temp1;
+  doc["child1_ph"] = ph;
   doc["Node Name"] = nodeName;
   doc["msg1"] = msg1;
   doc["led_status"] = led_status;
@@ -155,8 +155,8 @@ void readSensor() {
 
   // Convert analog reading to voltage
   float voltage = Value * (3.3 / 4095.0);
-  Serial.print("Temperature-2 : ");
-  Serial.print(String(temp2));
+  Serial.print("Temperature-1 : ");
+  Serial.print(String(temp1));
 
   // Convert voltage to pH using the Nernst equation
   // pH = slope * voltage + intercept
