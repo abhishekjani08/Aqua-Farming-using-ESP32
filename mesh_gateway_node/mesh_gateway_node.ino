@@ -1,3 +1,4 @@
+
 // Necessary Libraries
 #include "painlessMesh.h"
 #include <ArduinoJson.h>
@@ -139,6 +140,8 @@ void receivedCallback(uint32_t from, String &msg)
     child3_ph = doc["child3_ph"].as<double>();
   }
 
+  //Serial.println("");
+
   Serial.print("Child 1 Temp: ");
   Serial.print(child1_temperature);
   Serial.print(", Child 1 PH: ");
@@ -214,7 +217,7 @@ void loop()
   //Serial.println("");
   if (message_ready)
   {
-    Serial.println("Received from Serial2: " + message);
+    Serial.print("Received from Serial2: " + message);
 
     DynamicJsonDocument doc(1024);
     DeserializationError error = deserializeJson(doc, message);
