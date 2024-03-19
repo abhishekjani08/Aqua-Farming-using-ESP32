@@ -8,7 +8,7 @@
 
  
 // WiFi Credentials
-#define   MESH_PREFIX     "meshnetwork"
+#define   MESH_PREFIX     "meshnetwork2"
 #define   MESH_PASSWORD   "123456789"
 #define   MESH_PORT       5555
 #define LED_PIN 2 
@@ -33,11 +33,11 @@ String msg1 = "";
 String nodeName = "child1";
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
-double temp1;
 double child1_temperature;
-double child2_temperature;
+// double child2_temperature;
+double temp1;
 double child1_ph;
-double child2_ph;
+// double child2_ph;
 
 
 // Needed for painless library
@@ -62,9 +62,9 @@ void receivedCallback( uint32_t from, String &msg)
   led_status = doc["status"];
   msg1 = doc["msg1"].as<String>();
   child1_temperature = doc["child1_temperature"].as<double>();
-  child2_temperature = doc["child2_temperature"].as<double>();
+  // child2_temperature = doc["child2_temperature"].as<double>();
   child1_ph = doc["child1_ph"].as<double>();
-  child2_ph = doc["child2_ph"].as<double>();
+  // child2_ph = doc["child2_ph"].as<double>();
 
   Serial.println("Received in Child Node 1: " + json);
   
@@ -160,7 +160,7 @@ void readSensor() {
 
   // Convert voltage to pH using the Nernst equation
   // pH = slope * voltage + intercept
-  float slope = -9.35; // Adjust based on your calibration
+  float slope = -6.35; // Adjust based on your calibration
   float intercept = 21.34; // Adjust based on your calibration
   ph = slope * voltage + intercept;
 
