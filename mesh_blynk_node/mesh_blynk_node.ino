@@ -1,4 +1,3 @@
-
 #define BLYNK_PRINT Serial
 
 // Anish's Credentials
@@ -46,12 +45,28 @@ BLYNK_WRITE(V0) {
 
 
 // Data Coming from Blynk App
-BLYNK_WRITE(V1) {
+BLYNK_WRITE(V3) {
   board = 1;
   pin = LED_PIN;
   pin_status = param.asInt();  // Pin Status 1/0
   //Serial.println(pin_status);
-  Serial.println("V1 On");
+  Serial.println("Motor 1 ON");
+}
+
+BLYNK_WRITE(V6) {
+  board = 2;
+  pin = LED_PIN;
+  pin_status = param.asInt();  // Pin Status 1/0
+  //Serial.println(pin_status);
+  Serial.println("Motor 2 ON");
+}
+
+BLYNK_WRITE(V9) {
+  board = 3;
+  pin = LED_PIN;
+  pin_status = param.asInt();  // Pin Status 1/0
+  //Serial.println(pin_status);
+  Serial.println("Motor 3 ON");
 }
 
 // BLYNK_WRITE(V2) {
@@ -151,11 +166,12 @@ void loop()
       Serial2.println(json);
 
       // Update Blynk virtual pin
-      Blynk.virtualWrite(V5, temperature1);
-      Blynk.virtualWrite(V6, temperature2);
-      Blynk.virtualWrite(V2, temperature3);
-      Blynk.virtualWrite(V10, ph1);
-      Blynk.virtualWrite(V9, ph2);
+      Blynk.virtualWrite(V1, temperature1);
+      Blynk.virtualWrite(V4, temperature2);
+      Blynk.virtualWrite(V7, temperature3);
+      Blynk.virtualWrite(V2, ph1);
+      Blynk.virtualWrite(V5, ph2);
+
       // Get data from virtual pin
       // Blynk.virtualWrite(V3, doc["DO"].as<String>());
       // Blynk.virtualWrite(V4, doc["pH"].as<String>());

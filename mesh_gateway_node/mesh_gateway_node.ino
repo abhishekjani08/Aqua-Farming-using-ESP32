@@ -1,4 +1,3 @@
-
 // Necessary Libraries
 #include "painlessMesh.h"
 #include <ArduinoJson.h>

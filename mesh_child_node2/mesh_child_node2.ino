@@ -33,9 +33,9 @@ String msg1 = "";
 String nodeName = "child2";
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
+double temp2;
 double child1_temperature;
 double child2_temperature;
-double temp2;
 double child1_ph;
 double child2_ph;
 
@@ -75,7 +75,7 @@ void receivedCallback( uint32_t from, String &msg)
   }
   else{
     digitalWrite(led, !led_status);
-    //Serial.println("Child Node 1 OFF");
+    Serial.println("Child Node 2 OFF");
   }
 }
 Task taskSendMessage( TASK_SECOND * 5, TASK_FOREVER, &sendMessage );
