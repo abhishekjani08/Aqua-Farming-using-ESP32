@@ -19,12 +19,12 @@
 // Gateway Node ID:
 
 // Variables
-int led;
-int led_status;
+//int led;
+bool led_status;
 int board_number;
-int board;
-int pin;
-int pin_status;
+//int board;
+int pin_number;
+//int pin_status;
 bool message_ready = true;
 String message = "";
 String msg1 = "";
@@ -61,7 +61,7 @@ void sendMessage()
   msg1 = "Hello from Gateway Node with Node ID: " + String(nodeId);
   DynamicJsonDocument doc(1024);
   doc["board"] = board_number;
-  doc["pin"] = led;
+  doc["pin"] = pin_number;
   doc["status"] = led_status;
   doc["child1_temperature"] = child1_temperature;
   doc["child2_temperature"] = child2_temperature;
@@ -94,6 +94,8 @@ void send_request()
   doc_request["child2_ph"] = phChild2;
   doc_request["child3_ph"] = phChild3;
 
+  //Serial.println("");
+  Serial.println("\n");
   Serial.print("Sending Request - ");
   //Serial.println("IS Serial 2 available: " + Serial2.available());
   serializeJson(doc_request, Serial); //{"type":"Data","child1_temperature":0,"child2_temperature":0}
@@ -220,9 +222,10 @@ void loop()
 
     DynamicJsonDocument doc(1024);
     DeserializationError error = deserializeJson(doc, message);
-    board_number = doc["board_number"];
-    led = doc["led"];
+    board_number = doc["board"];
+    //led = doc["led"];
     led_status = doc["status"];
+    pin_number = doc["pin"];
 
     // reason behind getting last temperature even when child node 1 is down
     child1_temperature = doc["child1_temperature"].as<double>();

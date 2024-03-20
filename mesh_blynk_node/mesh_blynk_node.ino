@@ -149,8 +149,8 @@ void loop()
 
       doc["type"] = "response";
       // Get data from virtual pin
-      doc["board_status"] = board;
-      doc["led"] = pin;
+      doc["board"] = board;
+      doc["pin"] = pin;
       doc["status"] = pin_status;
       doc["child1_ph"] = ph1;
       doc["child1_temperature"] = temperature1;
