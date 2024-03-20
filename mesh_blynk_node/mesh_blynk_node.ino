@@ -45,12 +45,28 @@ BLYNK_WRITE(V0) {
 
 
 // Data Coming from Blynk App
-BLYNK_WRITE(V1) {
+BLYNK_WRITE(V3) {
   board = 1;
   pin = LED_PIN;
   pin_status = param.asInt();  // Pin Status 1/0
   //Serial.println(pin_status);
-  Serial.println("\nV1 On");
+  Serial.println("Motor 1 ON");
+}
+
+BLYNK_WRITE(V6) {
+  board = 2;
+  pin = LED_PIN;
+  pin_status = param.asInt();  // Pin Status 1/0
+  //Serial.println(pin_status);
+  Serial.println("Motor 2 ON");
+}
+
+BLYNK_WRITE(V9) {
+  board = 3;
+  pin = LED_PIN;
+  pin_status = param.asInt();  // Pin Status 1/0
+  //Serial.println(pin_status);
+  Serial.println("Motor 3 ON");
 }
 
 // BLYNK_WRITE(V2) {
@@ -98,37 +114,50 @@ void loop()
 
     if (doc["type"] == "Data")
     {
-      Serial.println("Received Type = Data in Blynk Node");
+      Serial.println("Received Data from Gateway in Blynk Node");
 
       double temperature1 = doc["child1_temperature"].as<double>();
-      Serial.println("Temperature Child 1- " + String(temperature1));
-
-      double ph1 = doc["child1_ph"].as<double>();
-      Serial.println("Ph Child 1- " + String(ph1));
-
       double temperature2 = doc["child2_temperature"].as<double>();
-      Serial.println("Temperature Child 2- " + String(temperature2));
-
-      double ph2 = doc["child2_ph"].as<double>();
-      Serial.println("Ph Child 2- " + String(ph2));
-
       double temperature3 = doc["child3_temperature"].as<double>();
-      Serial.println("Temperature Child 3- " + String(temperature3));
-
+      double ph1 = doc["child1_ph"].as<double>();
+      double ph2 = doc["child2_ph"].as<double>();
       double ph3 = doc["child3_ph"].as<double>();
-      Serial.println("Ph Child 3- " + String(ph3));
+
+      //Serial.println("");
+
+      Serial.print("Child 1: Temp = ");
+      Serial.print(temperature1);
+      Serial.print(" | PH =  ");
+      Serial.println(ph1);
+      
+      Serial.print("Child 2: Temp = ");
+      Serial.print(temperature2);
+      Serial.print(" | PH =  ");
+      Serial.println(ph2);
+
+      Serial.print("Child 3: Temp = ");
+      Serial.print(temperature3);
+      Serial.print(" | PH =  ");
+      Serial.println(ph3);
+
+      //Serial.println("Temperature Child 1- " + String(temperature1));
+      //Serial.println("Ph Child 1- " + String(ph1));
+      //Serial.println("Temperature Child 2- " + String(temperature2));
+      //Serial.println("Ph Child 2- " + String(ph2));
+      //Serial.println("Temperature Child 3- " + String(temperature3));
+      //Serial.println("Ph Child 3- " + String(ph3));
 
       doc["type"] = "response";
       // Get data from virtual pin
-      doc["board_status"] = board;
-      doc["led"] = pin;
+      doc["board"] = board;
+      doc["pin"] = pin;
       doc["status"] = pin_status;
-      doc["child1_ph"] = child1_ph;
-      doc["child1_temperature"] = child1_temperature;
-      doc["child2_ph"] = child2_ph;
-      doc["child2_temperature"] = child2_temperature;
-      doc["child3_ph"] = child3_ph;
-      doc["child3_temperature"] = child3_temperature;
+      doc["child1_ph"] = ph1;
+      doc["child1_temperature"] = temperature1;
+      doc["child2_ph"] = ph2;
+      doc["child2_temperature"] = temperature2;
+      doc["child3_ph"] = ph3;
+      doc["child3_temperature"] = temperature3;
 
       // Sending data to another ESP32
       String json;
@@ -137,15 +166,16 @@ void loop()
       Serial2.println(json);
 
       // Update Blynk virtual pin
-      Blynk.virtualWrite(V5, temperature1);
-      Blynk.virtualWrite(V6, temperature2);
-      Blynk.virtualWrite(V2, temperature3);
-      Blynk.virtualWrite(V10, ph1);
-      Blynk.virtualWrite(V9, ph2);
+      Blynk.virtualWrite(V1, temperature1);
+      Blynk.virtualWrite(V4, temperature2);
+      Blynk.virtualWrite(V7, temperature3);
+      Blynk.virtualWrite(V2, ph1);
+      Blynk.virtualWrite(V5, ph2);
+
       // Get data from virtual pin
       // Blynk.virtualWrite(V3, doc["DO"].as<String>());
       // Blynk.virtualWrite(V4, doc["pH"].as<String>());
-      //Blynk.virtualWrite(V5,doc["Temp"].as<String>());
+      // Blynk.virtualWrite(V5,doc["Temp"].as<String>());
       // Blynk.virtualWrite(V6, doc["Tds"].as<String>());
     }
     messageReady = false;

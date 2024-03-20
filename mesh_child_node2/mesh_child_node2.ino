@@ -26,16 +26,16 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature. 
 DallasTemperature sensors(&oneWire);
 
-int led;
-int led_status = 0;
+int pin_number;
+bool led_status;
 int board_number = 2;
 String msg1 = "";
 String nodeName = "child2";
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
+double temp2;
 double child1_temperature;
 double child2_temperature;
-double temp2;
 double child1_ph;
 double child2_ph;
 
@@ -58,7 +58,7 @@ void receivedCallback( uint32_t from, String &msg)
     Serial.println(error.c_str());
   }
   board_number = doc["board"];
-  led = doc["pin"];
+  pin_number = doc["pin"];
   led_status = doc["status"];
   msg1 = doc["msg1"].as<String>();
   child1_temperature = doc["child1_temperature"].as<double>();
@@ -68,14 +68,17 @@ void receivedCallback( uint32_t from, String &msg)
 
   Serial.println("Received in Child Node 2: " + json);
   
-  if (board_number == 2 && led_status == 1){
-    digitalWrite(led, led_status);
-    Serial.println("Child Node 2 ON");
+  Serial.println("Board Number is: " + String(board_number));
+  Serial.println("LED PIN is: " + String(pin_number));
+  Serial.println("LED Status is: " + String(led_status));
 
+  if (board_number == 2 && led_status == 1){
+    digitalWrite(pin_number, led_status);
+    Serial.println("Child Node 2 ON");
   }
   else{
-    digitalWrite(led, !led_status);
-    //Serial.println("Child Node 1 OFF");
+    digitalWrite(pin_number, !led_status);
+    Serial.println("Child Node 2 OFF");
   }
 }
 Task taskSendMessage( TASK_SECOND * 5, TASK_FOREVER, &sendMessage );
@@ -97,11 +100,13 @@ void sendMessage()
   double temp = sensors.getTempCByIndex(0);
   temp2=round(temp*100)/100.0;
   ph=round(ph*100)/100.0;
+  doc["Node Name"] = nodeName;
+  doc["board_number"] = board_number;
   doc["child2_temperature"] = temp2;
   doc["child2_ph"] = ph;
-  doc["Node Name"] = nodeName;
-  doc["msg1"] = msg1;
   doc["led_status"] = led_status;
+  doc["msg1"] = msg1;
+  doc["pin_number"] = pin_number;
   String msg ;
   serializeJson(doc, msg);
   mesh.sendBroadcast( msg );
