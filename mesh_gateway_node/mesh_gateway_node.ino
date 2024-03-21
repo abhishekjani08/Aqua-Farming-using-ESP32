@@ -21,7 +21,9 @@
 // Variables
 //int led;
 bool led_status;
-int board_number;
+int board_number_1;
+int board_number_2;
+
 //int board;
 int pin_number;
 //int pin_status;
@@ -60,7 +62,8 @@ void sendMessage()
   uint32_t nodeId = mesh.getNodeId();
   msg1 = "Hello from Gateway Node with Node ID: " + String(nodeId);
   DynamicJsonDocument doc(1024);
-  doc["board"] = board_number;
+  doc["board_1"] = board_number_1;
+  doc["board_2"] = board_number_2;
   doc["pin"] = pin_number;
   doc["status"] = led_status;
   doc["child1_temperature"] = child1_temperature;
@@ -222,7 +225,8 @@ void loop()
 
     DynamicJsonDocument doc(1024);
     DeserializationError error = deserializeJson(doc, message);
-    board_number = doc["board"];
+    board_number_1 = doc["board_1"];
+    board_number_2 = doc["board_2"];
     //led = doc["led"];
     led_status = doc["status"];
     pin_number = doc["pin"];

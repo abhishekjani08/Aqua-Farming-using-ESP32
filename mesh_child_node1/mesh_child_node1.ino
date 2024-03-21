@@ -26,9 +26,9 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature. 
 DallasTemperature sensors(&oneWire);
 
-int pin_number;
-bool led_status;
-int board_number = 1;
+int pin_number_1;
+bool led_status_1;
+int board_number_1 = 1;
 String msg1 = "";
 String nodeName = "child1";
 Scheduler userScheduler; // to control your personal task
@@ -57,9 +57,9 @@ void receivedCallback( uint32_t from, String &msg)
     Serial.print("deserializeJson() failed: ");
     Serial.println(error.c_str());
   }
-  board_number = doc["board"];
-  pin_number = doc["pin"];
-  led_status = doc["status"];
+  board_number_1 = doc["board"];
+  pin_number_1 = doc["pin"];
+  led_status_1 = doc["status"];
   msg1 = doc["msg1"].as<String>();
   child1_temperature = doc["child1_temperature"].as<double>();
   child2_temperature = doc["child2_temperature"].as<double>();
@@ -68,17 +68,17 @@ void receivedCallback( uint32_t from, String &msg)
 
   Serial.println("Received in Child Node 1: " + json);
   
-  Serial.println("Board Number is: " + String(board_number));
-  Serial.println("LED PIN is: " + String(pin_number));
-  Serial.println("LED Status is: " + String(led_status));
+  Serial.println("Board Number is: " + String(board_number_1));
+  Serial.println("LED PIN is: " + String(pin_number_1));
+  Serial.println("LED Status is: " + String(led_status_1));
 
-  if (board_number == 1 && led_status == 1){
-    digitalWrite(pin_number, led_status);
+  if (board_number_1 == 1 && led_status_1 == 1){
+    digitalWrite(pin_number_1, led_status_1);
     Serial.println("Child Node 1 ON");
 
   }
   else{
-    digitalWrite(pin_number, !led_status);
+    digitalWrite(pin_number_1, !led_status_1);
     Serial.println("Child Node 1 OFF");
   }
 }
@@ -102,12 +102,12 @@ void sendMessage()
   temp1=round(temp*100)/100.0;
   ph=round(ph*100)/100.0;
   doc["Node Name"] = nodeName;
-  doc["board_number"] = board_number;
+  doc["board_number_1"] = board_number_1;
   doc["child1_temperature"] = temp1;
   doc["child1_ph"] = ph;
-  doc["led_status"] = led_status;
+  doc["led_status_1"] = led_status_1;
   doc["msg1"] = msg1;
-  doc["pin_number"] = pin_number;
+  doc["pin_number_1"] = pin_number_1;
   String msg ;
   serializeJson(doc, msg);
   mesh.sendBroadcast( msg );

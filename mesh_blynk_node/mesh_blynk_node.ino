@@ -23,6 +23,8 @@ char pass[] = "123456789";
 
 // Variables
 int board;
+int board_1;
+int board_2;
 int pin;
 bool pin_status;
 String message = "";
@@ -46,7 +48,7 @@ BLYNK_WRITE(V0) {
 
 // Data Coming from Blynk App
 BLYNK_WRITE(V3) {
-  board = 1;
+  board_1 = 1;
   pin = LED_PIN;
   pin_status = param.asInt();  // Pin Status 1/0
   //Serial.println(pin_status);
@@ -54,7 +56,7 @@ BLYNK_WRITE(V3) {
 }
 
 BLYNK_WRITE(V6) {
-  board = 2;
+  board_2 = 2;
   pin = LED_PIN;
   pin_status = param.asInt();  // Pin Status 1/0
   //Serial.println(pin_status);
@@ -149,7 +151,8 @@ void loop()
 
       doc["type"] = "response";
       // Get data from virtual pin
-      doc["board"] = board;
+      doc["board_1"] = board_1;
+      doc["board_2"] = board_2;
       doc["pin"] = pin;
       doc["status"] = pin_status;
       doc["child1_ph"] = ph1;
