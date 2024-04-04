@@ -120,7 +120,7 @@ void receivedCallback(uint32_t from, String &msg)
   }
 
   msg1 = doc["msg1"].as<String>();
-  nodeName = doc["Node Name"].as<String>();
+  nodeName = doc["node"].as<String>();
 
   if (nodeName == "child1")
   {

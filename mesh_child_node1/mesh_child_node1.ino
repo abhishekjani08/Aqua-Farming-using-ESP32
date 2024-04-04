@@ -28,7 +28,7 @@ DallasTemperature sensors(&oneWire);
 
 int pin_number;
 bool led_status;
-int board_number;
+int board_number = 1;
 String msg1 = "";
 String nodeName = "child1";
 Scheduler userScheduler; // to control your personal task
@@ -75,10 +75,6 @@ void receivedCallback( uint32_t from, String &msg)
   if (board_number == 1 && led_status == 1){
     digitalWrite(pin_number, led_status);
     Serial.println("Child Node 1 ON");
-    digitalWrite(LED_PIN, HIGH);
-    delay(1000);
-    digitalWrite(LED_PIN, LOW);
-    delay(1000);
 
   }
   else{
@@ -95,7 +91,7 @@ void sendMessage()
   DynamicJsonDocument doc(1024);
   // Tempature 
   //json doc
-  //doc["type"] = "Data";
+  doc["type"] = "Data";
   sensors.requestTemperatures(); 
 
   //Serial.print("Celsius temperature: ");
@@ -105,13 +101,13 @@ void sendMessage()
   double temp = sensors.getTempCByIndex(0);
   temp1=round(temp*100)/100.0;
   ph=round(ph*100)/100.0;
-  doc["Name"] = nodeName;
-  doc["board"] = board_number;
+  doc["node"] = nodeName;
+  doc["board_number"] = board_number;
   doc["child1_temperature"] = temp1;
   doc["child1_ph"] = ph;
-  doc["status"] = led_status;
+  doc["led_status"] = led_status;
   doc["msg1"] = msg1;
-  doc["pin"] = pin_number;
+  doc["pin_number"] = pin_number;
   String msg ;
   serializeJson(doc, msg);
   mesh.sendBroadcast( msg );
