@@ -11,7 +11,8 @@
 #define   MESH_PREFIX     "meshnetwork"
 #define   MESH_PASSWORD   "123456789"
 #define   MESH_PORT       5555
-#define LED_PIN 2 
+#define LED_PIN 2
+#define MOTOR_LED_PIN 19
 
 // Data wire is plugged into port 5
 #define ONE_WIRE_BUS 5
@@ -73,12 +74,15 @@ void receivedCallback( uint32_t from, String &msg)
   Serial.println("LED Status is: " + String(led_status));
 
   if (board_number == 1 && led_status == 1){
-    digitalWrite(pin_number, led_status);
+    // digitalWrite(pin_number, led_status);
     Serial.println("Child Node 1 ON");
+    digitalWrite(MOTOR_LED_PIN, HIGH); // Turn on LED
+    // Serial.println("LED turned ON");
 
   }
   else{
-    digitalWrite(pin_number, !led_status);
+    //digitalWrite(pin_number, !led_status);
+    digitalWrite(MOTOR_LED_PIN, LOW); // Turn off LED
     Serial.println("Child Node 1 OFF");
   }
 }
@@ -132,7 +136,8 @@ void nodeTimeAdjustedCallback(int32_t offset) {
 void setup() {
   Serial.begin(115200);
   pinMode(LED_PIN, OUTPUT); 
-  digitalWrite(LED_PIN,LOW);
+  pinMode(MOTOR_LED_PIN, OUTPUT); 
+  //digitalWrite(LED_PIN,LOW);
   sensors.begin();
   pinMode(potPin, INPUT);
   delay(1000);
