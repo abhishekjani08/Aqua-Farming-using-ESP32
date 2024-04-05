@@ -120,7 +120,7 @@ void receivedCallback(uint32_t from, String &msg)
   }
 
   msg1 = doc["msg1"].as<String>();
-  nodeName = doc["Node Name"].as<String>();
+  nodeName = doc["node"].as<String>();
 
   if (nodeName == "child1")
   {
@@ -128,13 +128,13 @@ void receivedCallback(uint32_t from, String &msg)
     child1_temperature = doc["child1_temperature"].as<double>();
     child1_ph = doc["child1_ph"].as<double>();
   }
-  if (nodeName == "child2")
+  else if (nodeName == "child2")
   {
     Serial.println("Child 2 if statement");
     child2_temperature = doc["child2_temperature"].as<double>();
     child2_ph = doc["child2_ph"].as<double>();
   }
-  if (nodeName == "child3")
+  else if (nodeName == "child3")
   {
     Serial.println("Child 3 if statement");
     child3_temperature = doc["child3_temperature"].as<double>();
@@ -239,6 +239,7 @@ void loop()
 
     message_ready = false;
   }
+  userScheduler.execute();
   mesh.update();
   delay(10);
 }

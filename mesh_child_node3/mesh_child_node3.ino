@@ -26,20 +26,22 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature. 
 DallasTemperature sensors(&oneWire);
 
-int led;
-int led_status = 0;
+int pin_number;
+bool led_status;
 int board_number = 3;
 String msg1 = "";
 String nodeName = "child3";
 Scheduler userScheduler; // to control your personal task
 painlessMesh  mesh;
+double temp3;
 double child1_temperature;
 double child2_temperature;
 double child3_temperature;
-double temp3;
+
 double child1_ph;
 double child2_ph;
 double child3_ph;
+
 
 
 // Needed for painless library
@@ -60,7 +62,7 @@ void receivedCallback( uint32_t from, String &msg)
     Serial.println(error.c_str());
   }
   board_number = doc["board"];
-  led = doc["pin"];
+  pin_number = doc["pin"];
   led_status = doc["status"];
   msg1 = doc["msg1"].as<String>();
   child1_temperature = doc["child1_temperature"].as<double>();
@@ -72,17 +74,21 @@ void receivedCallback( uint32_t from, String &msg)
 
   Serial.println("Received in Child Node 3: " + json);
   
-  if (board_number == 3 && led_status == 1){
-    digitalWrite(led, led_status);
-    Serial.println("Child Node 3 ON");
+  Serial.println("Board Number is: " + String(board_number));
+  Serial.println("LED PIN is: " + String(pin_number));
+  Serial.println("LED Status is: " + String(led_status));
 
+  if (board_number == 3 && led_status == 1){
+    digitalWrite(pin_number, led_status);
+    Serial.println("Child Node 3 ON");
   }
   else{
-    digitalWrite(led, !led_status);
-    //Serial.println("Child Node 1 OFF");
+    digitalWrite(pin_number, !led_status);
+    Serial.println("Child Node 3 OFF");
   }
 }
 Task taskSendMessage( TASK_SECOND * 5, TASK_FOREVER, &sendMessage );
+Task taskReadSensor(TASK_SECOND * 1, TASK_FOREVER, &readSensor);
 
 void sendMessage()
 {
@@ -101,11 +107,13 @@ void sendMessage()
   double temp = sensors.getTempCByIndex(0);
   temp3=round(temp*100)/100.0;
   ph=round(ph*100)/100.0;
+  doc["node"] = nodeName;
+  doc["board_number"] = board_number;
   doc["child3_temperature"] = temp3;
   doc["child3_ph"] = ph;
-  doc["Node Name"] = nodeName;
-  doc["msg1"] = msg1;
   doc["led_status"] = led_status;
+  doc["msg1"] = msg1;
+  doc["pin_number"] = pin_number;
   String msg ;
   serializeJson(doc, msg);
   mesh.sendBroadcast( msg );
@@ -148,8 +156,10 @@ void setup() {
   mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
   Serial.println("\n");
   userScheduler.addTask( taskSendMessage );
+  userScheduler.addTask( taskReadSensor );
   Serial.println("\n");
   taskSendMessage.enable();
+  taskReadSensor.enable();
 }
 
 // Other code remains unchanged
@@ -174,9 +184,8 @@ void readSensor() {
 
 void loop() {
 
-  readSensor();
-
+  userScheduler.execute();
   // Your other mesh-related code
   mesh.update();
-  delay(1000);
+  // delay(1000);
 }

@@ -82,6 +82,7 @@ void receivedCallback( uint32_t from, String &msg)
   }
 }
 Task taskSendMessage( TASK_SECOND * 5, TASK_FOREVER, &sendMessage );
+Task taskReadSensor(TASK_SECOND * 1, TASK_FOREVER, &readSensor);
 
 void sendMessage()
 {
@@ -100,7 +101,7 @@ void sendMessage()
   double temp = sensors.getTempCByIndex(0);
   temp2=round(temp*100)/100.0;
   ph=round(ph*100)/100.0;
-  doc["Node Name"] = nodeName;
+  doc["node"] = nodeName;
   doc["board_number"] = board_number;
   doc["child2_temperature"] = temp2;
   doc["child2_ph"] = ph;
@@ -149,8 +150,10 @@ void setup() {
   mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
   Serial.println("\n");
   userScheduler.addTask( taskSendMessage );
+  userScheduler.addTask( taskReadSensor );
   Serial.println("\n");
   taskSendMessage.enable();
+  taskReadSensor.enable();
 }
 
 // Other code remains unchanged
@@ -175,9 +178,8 @@ void readSensor() {
 
 void loop() {
 
-  readSensor();
-
+  userScheduler.execute();
   // Your other mesh-related code
   mesh.update();
-  delay(1000);
+  // delay(1000);
 }

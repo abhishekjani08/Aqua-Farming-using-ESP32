@@ -11,7 +11,8 @@
 #define   MESH_PREFIX     "meshnetwork"
 #define   MESH_PASSWORD   "123456789"
 #define   MESH_PORT       5555
-#define LED_PIN 2 
+#define LED_PIN 2
+#define MOTOR_LED_PIN 19
 
 // Data wire is plugged into port 5
 #define ONE_WIRE_BUS 5
@@ -73,16 +74,20 @@ void receivedCallback( uint32_t from, String &msg)
   Serial.println("LED Status is: " + String(led_status));
 
   if (board_number == 1 && led_status == 1){
-    digitalWrite(pin_number, led_status);
+    // digitalWrite(pin_number, led_status);
     Serial.println("Child Node 1 ON");
+    digitalWrite(MOTOR_LED_PIN, HIGH); // Turn on LED
+    // Serial.println("LED turned ON");
 
   }
   else{
-    digitalWrite(pin_number, !led_status);
+    //digitalWrite(pin_number, !led_status);
+    digitalWrite(MOTOR_LED_PIN, LOW); // Turn off LED
     Serial.println("Child Node 1 OFF");
   }
 }
 Task taskSendMessage( TASK_SECOND * 5, TASK_FOREVER, &sendMessage );
+Task taskReadSensor(TASK_SECOND * 1, TASK_FOREVER, &readSensor);
 
 void sendMessage()
 {
@@ -101,7 +106,7 @@ void sendMessage()
   double temp = sensors.getTempCByIndex(0);
   temp1=round(temp*100)/100.0;
   ph=round(ph*100)/100.0;
-  doc["Node Name"] = nodeName;
+  doc["node"] = nodeName;
   doc["board_number"] = board_number;
   doc["child1_temperature"] = temp1;
   doc["child1_ph"] = ph;
@@ -131,7 +136,8 @@ void nodeTimeAdjustedCallback(int32_t offset) {
 void setup() {
   Serial.begin(115200);
   pinMode(LED_PIN, OUTPUT); 
-  digitalWrite(LED_PIN,LOW);
+  pinMode(MOTOR_LED_PIN, OUTPUT); 
+  //digitalWrite(LED_PIN,LOW);
   sensors.begin();
   pinMode(potPin, INPUT);
   delay(1000);
@@ -150,9 +156,13 @@ void setup() {
   mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
   Serial.println("\n");
   userScheduler.addTask( taskSendMessage );
+  userScheduler.addTask( taskReadSensor );
   Serial.println("\n");
   taskSendMessage.enable();
+  taskReadSensor.enable();
 }
+
+
 
 // Other code remains unchanged
 
@@ -170,15 +180,14 @@ void readSensor() {
   float intercept = 21.34; // Adjust based on your calibration
   ph = slope * voltage + intercept;
 
-  Serial.print(" | pH: ");
+  Serial.print(" | pH: ");  
   Serial.println(ph, 2);
 }
 
 void loop() {
 
-  readSensor();
-
+  userScheduler.execute();
   // Your other mesh-related code
   mesh.update();
-  delay(1000);
+  // delay(1000);
 }
