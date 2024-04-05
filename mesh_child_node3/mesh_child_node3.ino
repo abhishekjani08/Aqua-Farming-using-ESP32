@@ -88,6 +88,7 @@ void receivedCallback( uint32_t from, String &msg)
   }
 }
 Task taskSendMessage( TASK_SECOND * 5, TASK_FOREVER, &sendMessage );
+Task taskReadSensor(TASK_SECOND * 1, TASK_FOREVER, &readSensor);
 
 void sendMessage()
 {
@@ -155,8 +156,10 @@ void setup() {
   mesh.onNodeTimeAdjusted(&nodeTimeAdjustedCallback);
   Serial.println("\n");
   userScheduler.addTask( taskSendMessage );
+  userScheduler.addTask( taskReadSensor );
   Serial.println("\n");
   taskSendMessage.enable();
+  taskReadSensor.enable();
 }
 
 // Other code remains unchanged
@@ -181,9 +184,8 @@ void readSensor() {
 
 void loop() {
 
-  readSensor();
-
+  userScheduler.execute();
   // Your other mesh-related code
   mesh.update();
-  delay(1000);
+  // delay(1000);
 }
