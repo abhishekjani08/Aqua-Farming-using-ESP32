@@ -10,10 +10,14 @@
 #include <WiFiClient.h>
 #include <BlynkSimpleEsp32.h>
 #include <ArduinoJson.h>
+#include <TaskScheduler.h> // Include the TaskScheduler library
+
 
 // Serial2 pins of ESP32
 #define RXD2 16
 #define TXD2 17
+
+Scheduler userScheduler;
 
 char auth[] = BLYNK_AUTH_TOKEN;
 
@@ -93,12 +97,21 @@ BLYNK_WRITE(V9) {
   }
 }
 
+Task taskRunBlink(TASK_SECOND * 1, TASK_FOREVER, &runBlink);
+
 void setup()
 {
   // Debug console
   Serial.begin(115200); // For Debugging purpose
   Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2); // For sending data to another ESP32
   Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);    // Establishing Communication with Blynk Server
+  userScheduler.addTask( taskRunBlink );
+  taskRunBlink.enable();
+}
+
+void runBlink() {
+  Blynk.run(); // Handling Blynk Services
+  Serial.println("No Serial Communication");
 }
 
 void loop()
@@ -193,7 +206,6 @@ void loop()
     }
     messageReady = false;
   }
-  delay(1000);
-  Blynk.run(); // Handling Blynk Services
-  Serial.println("No Serial Communication");
+  //delay(1000);
+  
 }
