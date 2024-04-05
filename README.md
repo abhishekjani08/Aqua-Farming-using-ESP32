@@ -8,13 +8,19 @@
 ![Image](./Images/esp32-temperature-sensor.jpg)
 <!-- ![Image](https://esp32io.com/images/cover/esp32-temperature-sensor.jpg) -->
 
+## ESP32 Pins 
+
+![Image](./Images/ESP32_Pins.png)
+
 ## Installation Instruction
 
 _Download Arduino IDE from the official website_
 
 **Install Board in Board Manager:**
 - `esp32` by Espressif systems 
-- `esp8266` by ESP8266 Community [Board URL](http://arduino.esp8266.com/stable/package_esp8266com_index.json) [Reference Website](https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide)
+- `esp8266` by ESP8266 Community 
+    - [Board URL](http://arduino.esp8266.com/stable/package_esp8266com_index.json) 
+    - [Reference Website](https://randomnerdtutorials.com/how-to-install-esp8266-board-arduino-ide)
 
 **Install in Library Manager:**
 - `Blynk` for BlynkSimpleEsp32
