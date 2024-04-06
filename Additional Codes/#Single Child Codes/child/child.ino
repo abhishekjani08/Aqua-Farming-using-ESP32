@@ -160,9 +160,12 @@ void readSensor() {
 
   // Convert voltage to pH using the Nernst equation
   // pH = slope * voltage + intercept
-  float slope = -6.35; // Adjust based on your calibration
-  float intercept = 21.34; // Adjust based on your calibration
-  ph = slope * voltage + intercept;
+  // float slope = -8.35; // Adjust based on your calibration
+  // float intercept = 21.34; // Adjust based on your calibration
+  // ph = slope * voltage + intercept;
+
+  float intercept = 2.0;
+  ph=(3.3*voltage+intercept);
 
   Serial.print(" | pH: ");
   Serial.println(ph, 2);
