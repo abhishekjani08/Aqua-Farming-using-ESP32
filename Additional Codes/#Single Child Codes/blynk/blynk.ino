@@ -18,7 +18,7 @@
 char auth[] = BLYNK_AUTH_TOKEN;
 
 // Your WiFi credentials.
-char ssid[] = "iot";
+char ssid[] = "iot2";
 char pass[] = "123456789";
 
 // Variables
@@ -48,9 +48,9 @@ BLYNK_WRITE(V3) {
   pin_status = param.asInt();  // Pin Status 1/0
   //Serial.println(pin_status);
   if(pin_status == 1){
-    Serial.println("Motor 1 On");
+    Serial.println("Motor On");
   }else{
-    Serial.println("Motor 1 Off");
+    Serial.println("Motor Off");
   }
 }
 

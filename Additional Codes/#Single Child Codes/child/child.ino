@@ -12,6 +12,7 @@
 #define   MESH_PASSWORD   "123456789"
 #define   MESH_PORT       5555
 #define LED_PIN 2 
+#define MOTOR_LED_PIN 19
 
 // Data wire is plugged into port 5
 #define ONE_WIRE_BUS 5
@@ -27,7 +28,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 int led;
-int led_status = 0;
+bool led_status;
 int board_number = 1;
 String msg1 = "";
 String nodeName = "child1";
@@ -58,6 +59,7 @@ void receivedCallback( uint32_t from, String &msg)
     Serial.println(error.c_str());
   }
   board_number = doc["board"];
+  // pin_number = doc["pin"];
   led = doc["pin"];
   led_status = doc["status"];
   msg1 = doc["msg1"].as<String>();
@@ -68,14 +70,31 @@ void receivedCallback( uint32_t from, String &msg)
 
   Serial.println("Received in Child Node 1: " + json);
   
+  Serial.println("Board Number is: " + String(board_number));
+  // Serial.println("LED PIN is: " + String(pin_number));
+  Serial.println("LED Status is: " + String(led_status));
+
+  // if (board_number == 1 && led_status == 1){
+  //   digitalWrite(led, led_status);
+  //   Serial.println("Child Node 1 ON");
+
+  // }
+  // else{
+  //   digitalWrite(led, !led_status);
+  //   //Serial.println("Child Node 1 OFF");
+  // }
+
   if (board_number == 1 && led_status == 1){
-    digitalWrite(led, led_status);
-    Serial.println("Child Node 1 ON");
+    // digitalWrite(pin_number, led_status);
+    Serial.println("Child Node Motor ON");
+    digitalWrite(MOTOR_LED_PIN, HIGH); // Turn on LED
+    // Serial.println("LED turned ON");
 
   }
   else{
-    digitalWrite(led, !led_status);
-    //Serial.println("Child Node 1 OFF");
+    //digitalWrite(pin_number, !led_status);
+    digitalWrite(MOTOR_LED_PIN, LOW); // Turn off LED
+    Serial.println("Child Node Motor OFF");
   }
 }
 Task taskSendMessage( TASK_SECOND * 5, TASK_FOREVER, &sendMessage );
@@ -102,6 +121,8 @@ void sendMessage()
   doc["Node Name"] = nodeName;
   doc["msg1"] = msg1;
   doc["led_status"] = led_status;
+  // doc["pin_number"] = pin_number;
+
   String msg ;
   serializeJson(doc, msg);
   mesh.sendBroadcast( msg );
@@ -124,6 +145,7 @@ void nodeTimeAdjustedCallback(int32_t offset) {
 
 void setup() {
   Serial.begin(115200);
+  pinMode(MOTOR_LED_PIN, OUTPUT); 
   pinMode(LED_PIN, OUTPUT); 
   digitalWrite(LED_PIN,LOW);
   sensors.begin();
